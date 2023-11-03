@@ -1,0 +1,26 @@
+version: "3"
+services:
+  api:
+    image: 4sim5/locagest:6
+    build: .
+    environment:
+      - NODE_ENV=production
+      - DB_URL=mongodb://mongo
+    ports:
+      - "9090:9090"
+    networks:
+      - locagest
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:5
+    ports:
+      - "9091:27017"
+    volumes:
+      - database:/data/db
+    networks:
+      - locagest
+volumes:
+  database:
+networks:
+  locagest:
