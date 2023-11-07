@@ -47,22 +47,17 @@ export function getAllWithIdUser(req, res) {
 
   //Modifier une conversation
   export function patchOne(req, res) {
-        var fields
-        if (req.file) {     //si il y a un fichier alors je veux modifier l'image
-            fields = {
-                image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
-            }
-        } else {
-            fields = {
-                members: req.body.members,
-                isGroup: req.body.isGroup,
-                name: req.body.name,
-            }
-        }
         Conversation
         .findOneAndUpdate({
             _id: req.params.id
-        }, fields, {new: true})
+        }, 
+        {
+            members: req.body.members,
+            isGroup: req.body.isGroup,
+            name: req.body.name,
+            image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
+        }, 
+        {new: true})
         .then(updatedConv => {
             res.status(200).json(updatedConv)
         })

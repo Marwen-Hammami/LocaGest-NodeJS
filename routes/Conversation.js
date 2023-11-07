@@ -2,6 +2,7 @@ import express from 'express'
 import { body } from "express-validator"
 
 import { addOne, getAllWithIdUser, patchOne } from "../controllers/Conversation.js";
+import { gameImageUpload } from "../middlewares/multer-config.js";
 
 const router = express.Router()
 
@@ -16,10 +17,11 @@ router
 
 //Récupérer les conversation d'un utilisateur
 //Modifier une conversation
-//Modifier l'image d'une conversation de groupe
 router
 .route('/:id')
 .get(getAllWithIdUser)
-.patch(patchOne)
+.patch(
+    gameImageUpload,
+    patchOne)
 
 export default router
