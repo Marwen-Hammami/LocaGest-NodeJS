@@ -2,6 +2,7 @@ import express from 'express'
 import { body } from "express-validator"
 
 import { addOne, getAllWithIdConv, deleteOne } from "../controllers/Message.js";
+import { ImageUpload, multipleImageUpload } from "../middlewares/multer-config.js";
 
 const router = express.Router()
 
@@ -9,10 +10,9 @@ const router = express.Router()
 router
 .route('/')
 .post(
+    multipleImageUpload,
     body('conversationId').isString(),
     body('sender').isString(),
-    body('text').isString(),
-    body('file').isArray(),
     addOne
 )
 

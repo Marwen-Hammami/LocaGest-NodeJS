@@ -12,6 +12,7 @@ export function addOne(req, res) {
                 members: req.body.members,
                 isGroup: req.body.isGroup,
                 name: req.body.name,
+                image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
             }
         }else{
             jsonaddReq = {
@@ -47,16 +48,27 @@ export function getAllWithIdUser(req, res) {
 
   //Modifier une conversation
   export function patchOne(req, res) {
+    var jsonupdateReq
+        if (req.file) {
+            jsonupdateReq = {
+                members: req.body.members,
+                isGroup: req.body.isGroup,
+                name: req.body.name,
+                image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
+            }
+        }else{
+            jsonupdateReq = {
+                members: req.body.members,
+                isGroup: req.body.isGroup,
+                name: req.body.name,
+                image: req.body.image,
+            }
+        }
         Conversation
         .findOneAndUpdate({
             _id: req.params.id
         }, 
-        {
-            members: req.body.members,
-            isGroup: req.body.isGroup,
-            name: req.body.name,
-            image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
-        }, 
+        jsonupdateReq, 
         {new: true})
         .then(updatedConv => {
             res.status(200).json(updatedConv)

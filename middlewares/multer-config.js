@@ -9,11 +9,10 @@ const MIME_TYPES = {
     "image/png": "png",
 }
 
-const sizeGameImage = 5 * 1024 * 1024   // 5Mo
-const sizeUserAvatar = 512 * 1024       // 512Ko
+const sizeImage = 5 * 1024 * 1024   // 5Mo
 
-const gameImageUpload = makeMulter(sizeGameImage, "image")
-const userAvatarUpload = makeMulter(sizeUserAvatar, "avatar")
+const ImageUpload = makeMulter(sizeImage, "image")
+const multipleImageUpload = makeMulterMultiple(sizeImage, "image")
 
 function makeMulter(size, keyword) {
     return multer({
@@ -29,8 +28,30 @@ function makeMulter(size, keyword) {
             },
         }),
         //Limite la taille des images
-        limits: size
-    }).single(keyword)
+        limits: sizeImage
+    }).single("image")
 }
 
-export { gameImageUpload, userAvatarUpload }
+function makeMulterMultiple(size, keyword) {
+    return multer({
+        storage: diskStorage({
+            destination: (req, file, callback) => {
+                const __dirname = dirname(fileURLToPath(import.meta.url))
+                callback(null, join(__dirname, "../public/images"))
+            },
+            filename: (req, file, callback) => {
+                const name = file.originalname.split(" ").join("_")
+                const extension = MIME_TYPES[file.mimetype]
+                callback(null, name + Date.now() + "." + extension)
+            },
+        }),
+        //Limite la taille des images
+        limits: sizeImage
+    }).array("image")
+}
+
+export { ImageUpload, multipleImageUpload }
+
+
+//simplifier et ajouter le support pour pdf et mp3
+//avec keyword file
