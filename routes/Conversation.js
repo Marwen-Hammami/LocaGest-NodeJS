@@ -2,7 +2,7 @@ import express from 'express'
 import { body } from "express-validator"
 
 import { addOne, getAllWithIdUser, patchOne } from "../controllers/Conversation.js";
-import { ImageUpload } from "../middlewares/multer-config.js";
+import { FileUpload } from "../middlewares/multer-config.js";
 
 const router = express.Router()
 
@@ -10,7 +10,7 @@ const router = express.Router()
 router
 .route('/')
 .post(
-    ImageUpload,
+    FileUpload,
     body('members').isArray(),
     body('isGroup').isBoolean(),
     addOne
@@ -22,7 +22,7 @@ router
 .route('/:id')
 .get(getAllWithIdUser)
 .patch(
-    ImageUpload,
+    FileUpload,
     patchOne)
 
 export default router

@@ -7,15 +7,17 @@ const MIME_TYPES = {
     "image/jpg": "jpg",
     "image/jpeg": "jpg",
     "image/png": "png",
+    "application/pdf": "pdf",
+    "audio/mpeg": "mp3", 
 }
 
-const sizeImage = 5 * 1024 * 1024   // 5Mo
+const sizeFile = 5 * 1024 * 1024   // 5Mo
 
-const ImageUpload = makeMulter(sizeImage, "image")
-const multipleImageUpload = makeMulterMultiple(sizeImage, "image")
+const FileUpload = makeMulter(false)
+const multipleFileUpload = makeMulter(true)
 
-function makeMulter(size, keyword) {
-    return multer({
+function makeMulter(multiple) {
+    const mult = multer({
         storage: diskStorage({
             destination: (req, file, callback) => {
                 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -27,31 +29,12 @@ function makeMulter(size, keyword) {
                 callback(null, name + Date.now() + "." + extension)
             },
         }),
-        //Limite la taille des images
-        limits: sizeImage
-    }).single("image")
+        limits: sizeFile
+    })
+    if (multiple) {
+        return mult.array("file")
+    }
+    return mult.single("file")
 }
 
-function makeMulterMultiple(size, keyword) {
-    return multer({
-        storage: diskStorage({
-            destination: (req, file, callback) => {
-                const __dirname = dirname(fileURLToPath(import.meta.url))
-                callback(null, join(__dirname, "../public/images"))
-            },
-            filename: (req, file, callback) => {
-                const name = file.originalname.split(" ").join("_")
-                const extension = MIME_TYPES[file.mimetype]
-                callback(null, name + Date.now() + "." + extension)
-            },
-        }),
-        //Limite la taille des images
-        limits: sizeImage
-    }).array("image")
-}
-
-export { ImageUpload, multipleImageUpload }
-
-
-//simplifier et ajouter le support pour pdf et mp3
-//avec keyword file
+export { FileUpload, multipleFileUpload }
