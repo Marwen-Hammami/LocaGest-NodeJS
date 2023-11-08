@@ -1,15 +1,16 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import morgan from 'morgan'; 
+import morgan from 'morgan';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import crypto from 'crypto';
-import jwt from'jsonwebtoken';
+//import jwt from'jsonwebtoken';
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
-import user from './routes/user.js';
+
 
 //import routes
+import user from './routes/user.js';
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
 
