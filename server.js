@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
-
+import Reservation from './routes/reservation.js'; //tzidha hethy
 //import routes
 
 const app = express();
@@ -43,6 +43,7 @@ app.use('/img', express.static('public/images'));
 
 
 //Debut Appel des Routes **************************************
+app.use('/res',Reservation); //m3aha hethy
 
 //Fin Appel des Routes ****************************************
 
