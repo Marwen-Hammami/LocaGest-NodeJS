@@ -8,10 +8,12 @@ import crypto from 'crypto';
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
-
 //import routes
 import car from "./routes/car.js";
 import user from './routes/user.js';
+import technician from './routes/technicien.js';
+import client from './routes/client.js';
+import admin from './routes/admin.js'
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
 
@@ -60,6 +62,9 @@ app.use(bodyParser.json());
 //Debut Appel des Routes **************************************
 app.use('/car', car)
 app.use('/User', user);
+app.use('/tech', technician);
+app.use('/Client', client);
+app.use('/admin', admin);
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
 //Fin Appel des Routes ****************************************
