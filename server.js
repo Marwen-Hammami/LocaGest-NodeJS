@@ -10,6 +10,8 @@ import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 import user from './routes/user.js';
 
 //import routes
+import Message from './routes/Message.js';
+import Conversation from "./routes/Conversation.js";
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -55,7 +57,8 @@ app.use(bodyParser.json());
 
 //Debut Appel des Routes **************************************
 app.use('/User', user);
-//pp.use('/conversations', Conversation);
+app.use('/messages', Message);
+app.use('/conversations', Conversation);
 //Fin Appel des Routes ****************************************
 
 
