@@ -31,7 +31,7 @@ export async function createReservation(req, res) {
 // Retrieve all reservations
 export async function getAllReservations(req, res) {
     try {
-        const reservations = await find();
+        const reservations = await Reservation.find();
         res.status(200).json(reservations);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -39,12 +39,14 @@ export async function getAllReservations(req, res) {
 }
 
 // Update a reservation
+
+
 export async function updateReservation(req, res) {
     const reservationId = req.params.id;
     const { IdRes, DateDebut, DateFin, Statut, Total } = req.body;
 
     try {
-        const updatedReservation = await findByIdAndUpdate(reservationId, {
+        const updatedReservation = await Reservation.findByIdAndUpdate(reservationId, {
             IdRes,
             DateDebut,
             DateFin,
@@ -56,14 +58,13 @@ export async function updateReservation(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
-
 // Delete a reservation
 export async function deleteReservation(req, res) {
     const reservationId = req.params.id;
 
     // Find the reservation by ID and delete
     try {
-        const deletedReservation = await findByIdAndDelete(reservationId);
+        const deletedReservation = await Reservation.findByIdAndDelete(reservationId); // Assuming 'Reservation' is your Mongoose model
         res.status(200).json(deletedReservation);
     } catch (error) {
         res.status(500).json({ error: error.message });
