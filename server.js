@@ -8,6 +8,9 @@ import jwt from'jsonwebtoken';
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 import user from './routes/user.js';
+import technician from './routes/technicien.js';
+import client from './routes/client.js';
+import admin from './routes/admin.js'
 
 //import routes
 
@@ -55,6 +58,10 @@ app.use(bodyParser.json());
 
 //Debut Appel des Routes **************************************
 app.use('/User', user);
+app.use('/tech', technician);
+app.use('/Client', client);
+app.use('/admin', admin);
+
 //pp.use('/conversations', Conversation);
 //Fin Appel des Routes ****************************************
 

@@ -7,6 +7,7 @@ const technicianSchema = new Schema({
     required: true,
     unique: true
   },
+  
   specialization: {
     type: String,
     required: true
@@ -15,7 +16,6 @@ const technicianSchema = new Schema({
     type: Number,
     required: true
   },
-  // Add any other attributes specific to technicians
 });
 
 export default model('Technician', technicianSchema);
