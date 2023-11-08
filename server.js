@@ -6,6 +6,8 @@ import cors from 'cors';
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
 //import routes
+import Message from './routes/Message.js';
+import Conversation from "./routes/Conversation.js";
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -43,7 +45,8 @@ app.use('/img', express.static('public/images'));
 
 
 //Debut Appel des Routes **************************************
-
+app.use('/messages', Message);
+app.use('/conversations', Conversation);
 //Fin Appel des Routes ****************************************
 
 
