@@ -16,6 +16,7 @@ import client from './routes/client.js';
 import admin from './routes/admin.js'
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
+import Reservation from './routes/reservation.js';
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -60,6 +61,7 @@ app.use(bodyParser.json());
 
 
 //Debut Appel des Routes **************************************
+app.use('/res',Reservation); //m3aha hethy
 app.use('/car', car)
 app.use('/User', user);
 app.use('/tech', technician);
