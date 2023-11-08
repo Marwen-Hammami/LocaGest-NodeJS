@@ -10,6 +10,7 @@ import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
 
 //import routes
+import car from "./routes/car.js";
 import user from './routes/user.js';
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
@@ -57,6 +58,7 @@ app.use(bodyParser.json());
 
 
 //Debut Appel des Routes **************************************
+app.use('/car', car)
 app.use('/User', user);
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
