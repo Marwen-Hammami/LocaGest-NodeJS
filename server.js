@@ -1,18 +1,19 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import morgan from 'morgan'; 
+import morgan from 'morgan';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import crypto from 'crypto';
-import jwt from'jsonwebtoken';
+//import jwt from'jsonwebtoken';
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
+
+//import routes
+import car from "./routes/car.js";
 import user from './routes/user.js';
 import technician from './routes/technicien.js';
 import client from './routes/client.js';
 import admin from './routes/admin.js'
-
-//import routes
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
 
@@ -59,17 +60,13 @@ app.use(bodyParser.json());
 
 
 //Debut Appel des Routes **************************************
+app.use('/car', car)
 app.use('/User', user);
-<<<<<<< HEAD
 app.use('/tech', technician);
 app.use('/Client', client);
 app.use('/admin', admin);
-
-//pp.use('/conversations', Conversation);
-=======
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
->>>>>>> origin/User
 //Fin Appel des Routes ****************************************
 
 
