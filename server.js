@@ -13,6 +13,8 @@ import client from './routes/client.js';
 import admin from './routes/admin.js'
 
 //import routes
+import Message from './routes/Message.js';
+import Conversation from "./routes/Conversation.js";
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -58,11 +60,16 @@ app.use(bodyParser.json());
 
 //Debut Appel des Routes **************************************
 app.use('/User', user);
+<<<<<<< HEAD
 app.use('/tech', technician);
 app.use('/Client', client);
 app.use('/admin', admin);
 
 //pp.use('/conversations', Conversation);
+=======
+app.use('/messages', Message);
+app.use('/conversations', Conversation);
+>>>>>>> origin/User
 //Fin Appel des Routes ****************************************
 
 
