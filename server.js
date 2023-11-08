@@ -2,14 +2,18 @@ import express from 'express';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
 import cors from 'cors';
+import bodyParser from 'body-parser';
+import crypto from 'crypto';
+//import jwt from'jsonwebtoken';
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
+
 //import routes
 import car from "./routes/car.js";
-// import accidents from './routes/accidents.js';
-// import geolocalisation from './routes/geolocalisation.js';
-// import historique_entretiens from './routes/historique_entretien.js'
+import user from './routes/user.js';
+import Message from './routes/Message.js';
+import Conversation from "./routes/Conversation.js";
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -37,19 +41,27 @@ mongoose
 // Fin   connexion à mongodb **********************************
 
 
+const secretKey = crypto.randomBytes(32).toString('hex');
+console.log(secretKey);
+
+
+
 //Debut Appel des MiddleWares *********************************
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/img', express.static('public/images'));
+app.use(bodyParser.json());
+
 //Fin Appel des MiddleWares *********************************** 
 
 
 //Debut Appel des Routes **************************************
-// app.use('/accidents', accidents);
 app.use('/car', car)
-
+app.use('/User', user);
+app.use('/messages', Message);
+app.use('/conversations', Conversation);
 //Fin Appel des Routes ****************************************
 
 
