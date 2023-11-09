@@ -10,6 +10,7 @@ import { readdirSync } from "fs";
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
 //import routes
+import Agence from './routes/Agence.js';
 import car from "./routes/car.js";
 import user from './routes/user.js';
 import technician from './routes/technicien.js';
@@ -59,6 +60,7 @@ app.use(morgan("dev"));
 
 
 //Debut Appel des Routes **************************************
+app.use('/agence', Agence)
 app.use('/res',Reservation); //m3aha hethy
 app.use('/car', car)
 app.use('/User', user);
