@@ -3,15 +3,16 @@ import Reservation from '../models/reservation.js';
 
 // Create a new reservation
 export async function createReservation(req, res) {
-    const { DateDebut, DateFin, Statut, Total } = req.body;
+    const { IdRes, DateDebut, DateFin, Statut, Total } = req.body;
 
     // Validate input data (e.g., check if required fields are present)
-    if (!DateDebut || !DateFin || !Statut || !Total) {
-        return res.status(400).json({ error: 'DateDebut, DateFin, Statut, and Total are required fields.' });
+    if (!IdRes || !DateDebut || !DateFin || !Statut || !Total) {
+        return res.status(400).json({ error: 'IdRes, DateDebut, DateFin, Statut, and Total are required fields.' });
     }
 
     // Create a new reservation instance
     const newReservation = new Reservation({
+        IdRes,
         DateDebut,
         DateFin,
         Statut,
@@ -38,12 +39,15 @@ export async function getAllReservations(req, res) {
 }
 
 // Update a reservation
+
+
 export async function updateReservation(req, res) {
     const reservationId = req.params.id;
-    const { DateDebut, DateFin, Statut, Total } = req.body;
+    const { IdRes, DateDebut, DateFin, Statut, Total } = req.body;
 
     try {
         const updatedReservation = await Reservation.findByIdAndUpdate(reservationId, {
+            IdRes,
             DateDebut,
             DateFin,
             Statut,
@@ -54,7 +58,6 @@ export async function updateReservation(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
-
 // Delete a reservation
 export async function deleteReservation(req, res) {
     const reservationId = req.params.id;

@@ -1,14 +1,18 @@
 import { Schema, model } from 'mongoose';
 
-// Création de l'énumération pour le statut de réservation
+// Création de l'énumération
 const StatutRes = Object.freeze({
   Reservee: 'Réservée',
   Payee: 'Payée',
   Achevee: 'Achevée'
 });
 
-// Création du schéma de réservation
-const ReservationSchema = new Schema({
+// Création du schema 
+const HistoriqueSchema = new Schema({
+  IdRes: {
+    type: Number,
+    required: true
+  },
   DateDebut: {
     type: Date,
     required: true
@@ -28,12 +32,12 @@ const ReservationSchema = new Schema({
   }
 });
 
-// Ajout de l'énumération au schéma
-Object.assign(ReservationSchema.statics, {
+// Ajout de l'énumération au schema
+Object.assign(HistoriqueSchema.statics, {
   StatutRes
 });
 
-// Création du modèle de réservation
-const Reservation = model('Reservation', ReservationSchema);
+// Création du modèle 
+const Historique = model('Historique', HistoriqueSchema);
 
-export default Reservation;
+export default Historique;

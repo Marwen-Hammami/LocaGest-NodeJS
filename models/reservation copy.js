@@ -9,6 +9,10 @@ const StatutRes = Object.freeze({
 
 // Création du schéma de réservation
 const ReservationSchema = new Schema({
+  IdRes: {
+    type: Number,
+    required: true
+  },
   DateDebut: {
     type: Date,
     required: true

@@ -47,19 +47,12 @@ mongoose
 // Fin   connexion à mongodb **********************************
 
 
-const secretKey = crypto.randomBytes(32).toString('hex');
-console.log(secretKey);
-
-
-
 //Debut Appel des MiddleWares *********************************
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/img', express.static('public/images'));
-app.use(bodyParser.json());
-
 //Fin Appel des MiddleWares *********************************** 
 
 app.use(morgan("dev"));
