@@ -6,6 +6,7 @@ import cors from 'cors';
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
 //import routes
+import Agence from './routes/Agence.js';
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -43,7 +44,7 @@ app.use('/img', express.static('public/images'));
 
 
 //Debut Appel des Routes **************************************
-
+app.use('/agence', Agence)
 //Fin Appel des Routes ****************************************
 
 
