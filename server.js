@@ -65,12 +65,6 @@ app.use(bodyParser.json());
 app.use(morgan("dev"));
 
 
-
-
-
-
-
-
 //Debut Appel des Routes **************************************
 app.use('/res',Reservation); //m3aha hethy
 app.use('/car', car)
@@ -82,6 +76,7 @@ app.use('/messages', Message);
 app.use('/conversations', Conversation);
 app.use('/distribution', Distribution);
 app.use('/tools', Tools);
+
 //Fin Appel des Routes ****************************************
 
 
