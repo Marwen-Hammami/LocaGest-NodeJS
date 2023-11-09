@@ -13,7 +13,6 @@ export async function addTool(req, res)  {
         stock,
         price, 
         marque,
-        email,
         type, 
         image
       });
