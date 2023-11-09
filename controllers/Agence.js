@@ -32,7 +32,7 @@ import Agence from '../models/Agence.js';
         { new: true }
       )
       .then((agence) => {
-      res.status(500).json(agence);
+      res.status(200).json(agence);
       })
       .catch((err) => {
         res.status(500).json({ error: err });
