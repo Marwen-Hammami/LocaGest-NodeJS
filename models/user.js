@@ -1,35 +1,51 @@
+
 import { Schema, model } from 'mongoose';
 
 const userSchema = new Schema({
-  firstName: {
-    type: String,
-    required: true
-  },
-  lastName: {
+  username: {
     type: String,
     required: true
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    match: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/
   },
+  
   password: {
     type: String,
-    required: true
+    required: true,
   },
-  phoneNumber: {
+  
+  firstName: {
     type: String,
-    required: true
+    default: null
   },
-  dateOfBirth: {
-    type: Date,
-    required: true
+  lastName: {
+    type: String,
+    default: null
   },
-  online: {
-    type: Boolean,
-    default: false
+  creditCardNumber: {
+    type: Number,
+    default: null
+  },
+  rate: {
+    type: String,
+    enum: ['GOOD', 'AVERAGE', 'BAD'],
+    default: null
+  },
+  specialization: {
+    type: String,
+    default: null
+  },
+  experience: {
+    type: Number,
+    default: null
+  },
+  Roles: {
+    type: String,
+    enum: ['technicien', 'admin', 'client'],
+    default: 'client'
   }
-});
-
-export default model('User', userSchema);
+ });
+ export default model('User', userSchema);
