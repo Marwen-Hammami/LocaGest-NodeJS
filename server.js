@@ -1,9 +1,12 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import morgan from 'morgan';
+import morgan from 'morgan'; 
 import cors from 'cors';
+import bodyParser from 'body-parser';
+import crypto from 'crypto';
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
+import user  from './routes/user.js';
 
 //import routes
 
@@ -33,17 +36,26 @@ mongoose
 // Fin   connexion à mongodb **********************************
 
 
+const secretKey = crypto.randomBytes(32).toString('hex');
+console.log(secretKey);
+
+
+
 //Debut Appel des MiddleWares *********************************
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/img', express.static('public/images'));
+app.use(bodyParser.json());
+
 //Fin Appel des MiddleWares *********************************** 
 
 
 //Debut Appel des Routes **************************************
+app.use('/User', user);
 
+//pp.use('/conversations', Conversation);
 //Fin Appel des Routes ****************************************
 
 
