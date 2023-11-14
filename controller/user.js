@@ -6,7 +6,7 @@ const saltRounds = 10;
 
 // Create a new user
 export function createUser(req, res) {
-    const { username, email, password, firstName, lastName, rate, specialization, experience, Roles } = req.body;
+    const { username, email, password, firstName, lastName, rate, specialization, experience, Roles, online, image } = req.body;
 
     // Validate input data (e.g., check if required fields are present)
     if (!username || !email || !password) {
@@ -38,6 +38,8 @@ export function createUser(req, res) {
         specialization,
         experience,
         Roles,
+        online,
+        image,
     });
 
     // Save the user to the database

@@ -46,6 +46,8 @@ const userSchema = new Schema({
     type: String,
     enum: ['technicien', 'admin', 'client'],
     default: 'client'
-  }
+  },
+  online: Boolean,
+  image: String
  });
  export default model('User', userSchema);

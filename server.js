@@ -8,7 +8,6 @@ import crypto from 'crypto';
 import { readdirSync } from "fs";
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
-import user  from './routes/user.js';
 
 //import routes
 import Agence from './routes/Agence.js';
@@ -61,9 +60,6 @@ app.use(morgan("dev"));
 
 
 //Debut Appel des Routes **************************************
-
-app.use('/User', user);
-
 
 app.use('/agence', Agence)
 app.use('/res',Reservation); //m3aha hethy
