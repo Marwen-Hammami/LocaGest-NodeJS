@@ -4,7 +4,7 @@ import { Schema, model } from 'mongoose';
 const userSchema = new Schema({
   username: {
     type: String,
-    required: true
+    default: null
   },
   email: {
     type: String,
@@ -32,7 +32,7 @@ const userSchema = new Schema({
   rate: {
     type: String,
     enum: ['GOOD', 'AVERAGE', 'BAD'],
-    default: null
+    default: 'GOOD'
   },
   specialization: {
     type: String,
@@ -42,12 +42,25 @@ const userSchema = new Schema({
     type: Number,
     default: null
   },
-  Roles: {
+  roles: {
     type: String,
     enum: ['technicien', 'admin', 'client'],
     default: 'client'
   },
-  online: Boolean,
-  image: String
+  isVerified : 
+  {
+    type : Boolean,
+    default : false 
+  },
+  phoneNumber : 
+  {
+    type : String,
+    default: null
+
+  },
+  resetToken: String,
+  resetTokenExpiration: Date,
+  otpCode: String,
+  otpExpiration: Date
  });
  export default model('User', userSchema);

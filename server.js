@@ -13,9 +13,6 @@ import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 import Agence from './routes/Agence.js';
 import car from "./routes/car.js";
 import user from './routes/user.js';
-import technician from './routes/technicien.js';
-import client from './routes/client.js';
-import admin from './routes/admin.js'
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
 import Reservation from './routes/reservation.js';
@@ -67,9 +64,6 @@ app.use('/res',Reservation); //m3aha hethy
 app.use('/histo',Historique);
 app.use('/car', car)
 app.use('/User', user);
-app.use('/tech', technician);
-app.use('/Client', client);
-app.use('/admin', admin);
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
 
