@@ -1,26 +1,14 @@
-<<<<<<< HEAD
 
 import { Schema, model } from 'mongoose';
 
 const userSchema = new Schema({
   username: {
-=======
-import { Schema, model } from 'mongoose';
-
-const userSchema = new Schema({
-  firstName: {
     type: String,
-    required: true
-  },
-  lastName: {
->>>>>>> origin/User
-    type: String,
-    required: true
+    default: null
   },
   email: {
     type: String,
     required: true,
-<<<<<<< HEAD
     match: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/
   },
   
@@ -44,7 +32,7 @@ const userSchema = new Schema({
   rate: {
     type: String,
     enum: ['GOOD', 'AVERAGE', 'BAD'],
-    default: null
+    default: 'GOOD'
   },
   specialization: {
     type: String,
@@ -54,33 +42,25 @@ const userSchema = new Schema({
     type: Number,
     default: null
   },
-  Roles: {
+  roles: {
     type: String,
     enum: ['technicien', 'admin', 'client'],
     default: 'client'
-  }
+  },
+  isVerified : 
+  {
+    type : Boolean,
+    default : false 
+  },
+  phoneNumber : 
+  {
+    type : String,
+    default: null
+
+  },
+  resetToken: String,
+  resetTokenExpiration: Date,
+  otpCode: String,
+  otpExpiration: Date
  });
  export default model('User', userSchema);
-=======
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  phoneNumber: {
-    type: String,
-    required: true
-  },
-  dateOfBirth: {
-    type: Date,
-    required: true
-  },
-  online: {
-    type: Boolean,
-    default: false
-  }
-});
-
-export default model('User', userSchema);
->>>>>>> origin/User
