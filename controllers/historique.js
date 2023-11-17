@@ -6,8 +6,8 @@ export async function createHistorique(req, res) {
     const { IdRes, DateDebut, DateFin, Statut, Total } = req.body;
 
     // Validate input data
-    if (!IdRes || !DateDebut || !DateFin || !Statut || !Total) {
-        return res.status(400).json({ error: 'IdRes, DateDebut, DateFin, Statut, and Total are required fields.' });
+    if (!IdRes || !DateDebut || !DateFin || !Total) {
+        return res.status(400).json({ error: 'IdRes, DateDebut, DateFin and Total are required fields.' });
     }
 
     // Create a new historique instance

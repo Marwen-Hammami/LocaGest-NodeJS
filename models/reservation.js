@@ -17,10 +17,18 @@ const ReservationSchema = new Schema({
     type: Date,
     required: true
   },
+  HeureDebut: {
+    type: String,
+    required: true
+  },
+  HeureFin: {
+    type: String,
+    required: true
+  },
   Statut: {
     type: String,
     enum: Object.values(StatutRes),
-    required: true
+    required: false
   },
   Total: {
     type: Number,

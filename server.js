@@ -19,6 +19,7 @@ import admin from './routes/admin.js'
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
 import Reservation from './routes/reservation.js';
+import Historique from './routes/historique.js';
 import Distribution from './routes/distribution.js';
 import Tools from './routes/tools.js';
 
@@ -63,7 +64,7 @@ app.use(morgan("dev"));
 
 app.use('/agence', Agence)
 app.use('/res',Reservation); //m3aha hethy
-
+app.use('/histo',Historique);
 app.use('/car', car)
 app.use('/User', user);
 app.use('/tech', technician);

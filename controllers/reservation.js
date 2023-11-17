@@ -3,17 +3,19 @@ import Reservation from '../models/reservation.js';
 
 // Create a new reservation
 export async function createReservation(req, res) {
-    const { DateDebut, DateFin, Statut, Total } = req.body;
+    const { DateDebut, DateFin,HeureDebut, HeureFin,Statut, Total } = req.body;
 
     // Validate input data (e.g., check if required fields are present)
-    if (!DateDebut || !DateFin || !Statut || !Total) {
-        return res.status(400).json({ error: 'DateDebut, DateFin, Statut, and Total are required fields.' });
+    if (!DateDebut || !DateFin || !HeureDebut || !HeureFin ) {
+        return res.status(400).json({ error: 'DateDebut, DateFin, HeureDebut and HeureFin are required fields.' });
     }
 
     // Create a new reservation instance
     const newReservation = new Reservation({
         DateDebut,
         DateFin,
+        HeureDebut,
+        HeureFin,
         Statut,
         Total
     });
@@ -40,12 +42,14 @@ export async function getAllReservations(req, res) {
 // Update a reservation
 export async function updateReservation(req, res) {
     const reservationId = req.params.id;
-    const { DateDebut, DateFin, Statut, Total } = req.body;
+    const { DateDebut, DateFin ,HeureDebut,HeureFin, Statut, Total } = req.body;
 
     try {
         const updatedReservation = await Reservation.findByIdAndUpdate(reservationId, {
             DateDebut,
             DateFin,
+            HeureDebut,
+            HeureFin,
             Statut,
             Total
         }, { new: true }); // Return the updated reservation

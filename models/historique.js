@@ -24,7 +24,7 @@ const HistoriqueSchema = new Schema({
   Statut: {
     type: String,
     enum: Object.values(StatutRes),
-    required: true
+    required: false
   },
   Total: {
     type: Number,
