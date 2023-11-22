@@ -6,6 +6,22 @@ export function addOne(req, res) {
     if (!validationResult(req).isEmpty()) {
         res.status(400).json({ errors: validationResult(req).array() })
     }else {
+        var convIdString = req.body.conversationId
+        var senderIdString = req.body.sender
+        var textString = req.body.text
+        const substring = '"';
+
+        const regex = new RegExp(substring);
+        if (regex.test(convIdString)) {
+            convIdString = convIdString.slice(0, -1);
+            convIdString = convIdString.substring(1);
+
+            senderIdString = senderIdString.slice(0, -1);
+            senderIdString = senderIdString.substring(1);
+
+            textString = textString.slice(0, -1);
+            textString = textString.substring(1);
+        } 
         var jsonaddReq
         if (req.files) {
             var fileUrls = []
@@ -13,9 +29,9 @@ export function addOne(req, res) {
                 fileUrls.push(`${req.protocol}://${req.get('host')}/img/${file.filename}`)
             }
             jsonaddReq = {
-                conversationId: req.body.conversationId,
-                sender: req.body.sender,
-                text: req.body.text,
+                conversationId: convIdString,
+                sender: senderIdString,
+                text: textString,
                 file: fileUrls,
             }
         }else{

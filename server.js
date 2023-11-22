@@ -4,22 +4,22 @@ import morgan from 'morgan';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import crypto from 'crypto';
-<<<<<<< HEAD
-=======
-//import jwt from'jsonwebtoken';
->>>>>>> origin/User
+
+import { readdirSync } from "fs";
 
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
-import user  from './routes/user.js';
 
 //import routes
+import Agence from './routes/Agence.js';
 import car from "./routes/car.js";
 import user from './routes/user.js';
-import technician from './routes/technicien.js';
-import client from './routes/client.js';
-import admin from './routes/admin.js'
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
+import Reservation from './routes/reservation.js';
+import Historique from './routes/historique.js';
+import Distribution from './routes/distribution.js';
+import Tools from './routes/tools.js';
+import socketController from './socket/socketController.js';
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -47,42 +47,39 @@ mongoose
 // Fin   connexion à mongodb **********************************
 
 
-const secretKey = crypto.randomBytes(32).toString('hex');
-console.log(secretKey);
-
-
-
 //Debut Appel des MiddleWares *********************************
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/img', express.static('public/images'));
-app.use(bodyParser.json());
-
 //Fin Appel des MiddleWares *********************************** 
+
+app.use(morgan("dev"));
 
 
 //Debut Appel des Routes **************************************
-<<<<<<< HEAD
-app.use('/User', user);
 
-//pp.use('/conversations', Conversation);
-=======
+app.use('/agence', Agence)
+app.use('/res',Reservation); //m3aha hethy
+app.use('/histo',Historique);
 app.use('/car', car)
 app.use('/User', user);
-app.use('/tech', technician);
-app.use('/Client', client);
-app.use('/admin', admin);
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
->>>>>>> origin/User
+
+app.use('/distribution', Distribution);
+app.use('/tools', Tools);
 //Fin Appel des Routes ****************************************
 
 
 app.use(notFoundError);
 app.use(errorHandler);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
   });
+
+// Debut SocketIo *********************************************
+  socketController(server);
+// Fin SocketIo ***********************************************
