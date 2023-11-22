@@ -19,6 +19,7 @@ import Reservation from './routes/reservation.js';
 import Historique from './routes/historique.js';
 import Distribution from './routes/distribution.js';
 import Tools from './routes/tools.js';
+import socketController from './socket/socketController.js';
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -75,6 +76,10 @@ app.use('/tools', Tools);
 app.use(notFoundError);
 app.use(errorHandler);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
   });
+
+// Debut SocketIo *********************************************
+  socketController(server);
+// Fin SocketIo ***********************************************
