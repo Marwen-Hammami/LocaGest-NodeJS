@@ -29,10 +29,28 @@ const socketController = (server) => {
         });
     
         //send and get message
-        socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+        socket.on("sendMessage", (data) => {
+          console.log(data)
+          // Extract the senderId substring between "senderId=" and the first comma ","
+          const senderIdStartIndex = data.indexOf("senderId=") + "senderId=".length;
+          const firstCommaIndex = data.indexOf(",", senderIdStartIndex);
+          const senderId = data.substring(senderIdStartIndex, firstCommaIndex);
+          // Extract the receiverId substring between "receiverId=" and the second comma ","
+          const receiverIdStartIndex = data.indexOf("receiverId=") + "receiverId=".length;
+          const secondCommaIndex = data.indexOf(",", firstCommaIndex + 1);
+          const receiverId = data.substring(receiverIdStartIndex, secondCommaIndex);
+          // Extract the substring between "text=" and the end of the string
+          const textStartIndex = data.indexOf("text=") + "text=".length;
+          const text = data.substring(textStartIndex, data.length-1);
+
+          console.log("IN SEND!");
+          console.log(senderId);
+          console.log(receiverId);
+          console.log(text);
             const user = getUser(receiverId);
             if (user) {
-            io.to(user.socketId).emit("getMessage");
+            io.to(user.socketId).emit("getMessage", text, senderId);
+            console.log("sent");
             }
         });
     
