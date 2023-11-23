@@ -26,13 +26,15 @@ router.get('/verify-email', verifyEmail);
 // Protected routes (authentication required)
 
 // Authentication middleware applied to the following routes
-router.use(authenticate);
 
 // Get all users
 router.get('/', getAllUsers);
 
 // Update a user
 router.put('/:id', updateUser);
+
+router.use(authenticate);
+
 
 // Delete a user
 router.delete('/:id', deleteUser);
