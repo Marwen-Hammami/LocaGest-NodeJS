@@ -3,28 +3,38 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
 const carSchema = new Schema({
-  Immatriculation: String,
-  Marque: String,
-  Modele: String,
-  Type: {
+  immatriculation: String,
+  marque: String,
+  modele: String,
+  type: {
     type: String,
     enum: ['Sedan', 'SUV', 'Hatchback', 'Convertible', 'Truck','Sportive', 'autre'],
+    default:'autre'
   },
-  Fuel: {
+  carburant: {
     type: String,
-    enum: ['Gasoline', 'Diesel', 'Electrique', 'Hybride', 'autre'],
+    enum: ['Essence', 'Diesel', 'Electrique', 'Hybride', 'autre'],
   },
-  Gearbox: {
+  boite: {
     type: String,
     enum: ['Manuelle', 'Automatique'],
   },
-  Cylindée: String,
-  Disponibility: {
+  cylindée:{
+    type: String,
+    default:'autre'
+  } ,
+  disponibility: {
     type: String,
     enum: ['Disponible', 'Louée', 'Maintenance', 'autre'],
   },
-  EtatVoiture: String,
-  PrixParJour: Number,
+  etatVoiture: {
+    type: String,
+    default:'autre'
+  },
+  prixParJour:{
+    type: Number,
+    default:5
+  },
 });
 
 const Car = model('Car', carSchema);
