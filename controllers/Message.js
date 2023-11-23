@@ -8,19 +8,20 @@ export function addOne(req, res) {
     }else {
         var convIdString = req.body.conversationId
         var senderIdString = req.body.sender
-        var textString = req.body.text
         const substring = '"';
 
         const regex = new RegExp(substring);
         if (regex.test(convIdString)) {
+            console.log("The string contains the substring.")
             convIdString = convIdString.slice(0, -1);
             convIdString = convIdString.substring(1);
-
+            console.log(convIdString)
+        } 
+        if (regex.test(senderIdString)) {
             senderIdString = senderIdString.slice(0, -1);
             senderIdString = senderIdString.substring(1);
-
-            textString = textString.slice(0, -1);
-            textString = textString.substring(1);
+            console.log("The string contains the substring.")
+            console.log(senderIdString)
         } 
         var jsonaddReq
         if (req.files) {
@@ -29,9 +30,9 @@ export function addOne(req, res) {
                 fileUrls.push(`${req.protocol}://${req.get('host')}/img/${file.filename}`)
             }
             jsonaddReq = {
-                conversationId: convIdString,
-                sender: senderIdString,
-                text: textString,
+                conversationId: convIdString,//req.body.conversationId,
+                sender: senderIdString, //req.body.sender,
+                text: req.body.text,
                 file: fileUrls,
             }
         }else{
