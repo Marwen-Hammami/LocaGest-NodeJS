@@ -2,6 +2,7 @@ import Agence from '../models/Agence.js';
 
 // Créer une nouvelle Agence
   export function addOne(req, res) {
+      console.log(req.body)
     Agence.create(req.body)
         .then((newAgence) => {
           res.status(200).json(newAgence);
@@ -13,7 +14,7 @@ import Agence from '../models/Agence.js';
 
   // Obtenir la liste de toutes les Agences
   export function getAllAgences(req, res) {
-    Agence.find({})
+    Agence.find({}).populate("IdHead")
       .then((agences) => {
         res.status(200).json(agences);
       })
