@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, getAllUsers, updateUser, deleteUser , signInUser ,forgotPassword , resetPassword ,verifyEmail, forgotPasswordSMS  } from '../controller/user.js';
+import { createUser, getUserById,getAllUsers, updateUser, deleteUser , signInUser ,forgotPassword , resetPassword ,verifyEmail, forgotPasswordSMS  } from '../controller/user.js';
 import { authenticate } from '../middlewares/authenticate.js';
 
 
@@ -32,6 +32,9 @@ router.get('/', getAllUsers);
 
 // Update a user
 router.put('/:id', updateUser);
+
+router.get('/:id', getUserById);
+
 
 router.use(authenticate);
 
