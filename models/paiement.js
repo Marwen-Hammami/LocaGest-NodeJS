@@ -23,7 +23,7 @@ const PaiementSchema = new Schema({
   methodeDePaiement: {
     type: String,
     enum: Object.values(MethodeP),
-    required: true
+    required: false
   }
 });
 
