@@ -19,7 +19,7 @@ router
 )
 
 router
-.route("/:plate")
+.route("/:immatriculation")
 .put(updateCar)
 .delete(deleteCar)
 
