@@ -57,6 +57,7 @@ app.use('/img', express.static('public/images'));
 
 app.use(morgan("dev"));
 
+app.use('/uploads', express.static('uploads'));
 
 //Debut Appel des Routes **************************************
 
