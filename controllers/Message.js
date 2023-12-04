@@ -26,7 +26,8 @@ export function addOne(req, res) {
         if (req.files) {
             var fileUrls = []
             for(const file of req.files) {
-                fileUrls.push(`${req.protocol}://${req.get('host')}/img/${file.filename}`)
+                // fileUrls.push(`${req.protocol}://${req.get('host')}/img/${file.filename}`)
+                fileUrls.push(`https://locagest.onrender.com/img/${file.filename}`)
             }
             jsonaddReq = {
                 conversationId: convIdString,
