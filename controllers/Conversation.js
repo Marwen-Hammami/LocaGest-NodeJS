@@ -3,6 +3,7 @@ import { validationResult } from "express-validator"
 
 //Créer une conversation
 export function addOne(req, res) {
+    console.log('Received request for adding Conversation:', req.params, req.file);
     if (!validationResult(req).isEmpty()) {
         res.status(400).json({ errors: validationResult(req).array() })
     }else {
