@@ -34,9 +34,9 @@ mongoose.set('debug', true)
 // Utilisation des promesses ES6 pour mongodb
 mongoose.Promise = global.Promise
 
-//Se connecter à MongoDB
+//Se connecter à MongoDB : old : .connect(`mongodb://${hostname}:27017/${databaseName}`)
 mongoose
-    .connect(`mongodb://${hostname}:27017/${databaseName}`)
+    .connect(`${db_url}/${databaseName}`)
     .then(() => {
         console.log(`Connected to ${databaseName}`)
     })
