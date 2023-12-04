@@ -5,32 +5,25 @@ services:
       - key: NODE_ENV
         value: production
       - key: DB_URL
-        fromService:
-          type: mongodb
-          name: mongo
+        fromDatabase:
+          name: database
           property: connectionString
     startCommand: npm start
     buildCommand: npm install
-    repo: https://github.com/Marwen-Hammami/LocaGest-NodeJS.git # Replace with your actual GitHub repo
-    region: frankfurt # Choose your desired region
-    plan: web.small # Choose your desired plan
+    repo: https://github.com/your-username/your-repo.git
+    region: oregon
+    plan: web.small
     env: nodejs
     network: locagest
     dependencies:
-      - name: mongo
-        type: service
-        alias: mongo
+      - name: database
+        type: database
+        alias: database
 
-  - type: mongodb
-    name: mongo
+databases:
+  - name: database
+    databaseName: locagest
     plan: data
-    region: frankfurt # Choose your desired region
+    region: oregon
     env: mongodb
     network: locagest
-
-volumes:
-  - name: database
-    sizeGB: 10 # Choose your desired size
-
-networks:
-  - name: locagest
