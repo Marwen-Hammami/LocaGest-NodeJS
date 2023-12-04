@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, getAllUsers, updateUser, deleteUser , signInUser ,forgotPassword , resetPassword ,verifyEmail, forgotPasswordSMS  } from '../controller/user.js';
+import { createUser, getUserById,getAllUsers, updateUser, deleteUser , signInUser ,forgotPassword , resetPassword ,verifyEmail, forgotPasswordSMS  } from '../controller/user.js';
 import { authenticate } from '../middlewares/authenticate.js';
 
 
@@ -26,13 +26,18 @@ router.get('/verify-email', verifyEmail);
 // Protected routes (authentication required)
 
 // Authentication middleware applied to the following routes
-router.use(authenticate);
 
 // Get all users
 router.get('/', getAllUsers);
 
 // Update a user
 router.put('/:id', updateUser);
+
+router.get('/:id', getUserById);
+
+
+router.use(authenticate);
+
 
 // Delete a user
 router.delete('/:id', deleteUser);

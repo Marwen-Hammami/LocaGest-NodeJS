@@ -2,7 +2,7 @@ import Car from '../models/car.js';
 
 // Créer une nouvelle voiture
   export function addOnce(req, res) {
-    // console.log(req.body)
+     console.log(req.body)
     // if (!validationResult(req).isEmpty()) {
     //   res.status(400).json({ errors: validationResult(req).array() });
     // } else {
@@ -39,33 +39,51 @@ import Car from '../models/car.js';
   }
 
   export function updateCar(req, res) {
-    // Récupérer la plaque et les données de la requête
-    const { plate } = req.params;
-    const { brand, model, type, fuel, gearbox, cylindree, disponibility, etatVoiture, prixParJour } = req.body;
-
-    Car.findByIdAndUpdate(
-      { _id: plate },
-      req.body,
-        { new: true }
-      )
+    // Récupérer l'immatriculation et les données de la requête
+    const { immatriculation } = req.params;
+    const { marque, modele, type, carburant, boite, cylindree, disponibility, etatVoiture, prixParJour } = req.body;
+  
+    Car.findOneAndUpdate(
+      { immatriculation: immatriculation },
+      { marque, modele, type, carburant, boite, cylindree, disponibility, etatVoiture, prixParJour },
+      { new: true }
+    )
       .then((doc1) => {
-      res.status(500).json(doc1);
+        if (doc1) {
+          console.log("Voiture mise à jour avec succès :", doc1);
+          res.status(200).json(doc1);
+        } else {
+          console.log("Voiture non trouvée.");
+          res.status(404).json({ error: "Voiture non trouvée" });
+        }
       })
       .catch((err) => {
+        console.error("Erreur lors de la mise à jour de la voiture :", err);
         res.status(500).json({ error: err });
       });
   }
-
+  
+  
   export function deleteCar(req, res) {
-    Car
-    .findOneAndRemove({ "_id" : req.params.plate})
-    .then(doc => {
-        res.status(200).json(doc)
-    })
-    .catch(err => {
-        res.status(500).json({error: err})
-    })
-  }
+    // Récupérer l'immatriculation de la requête
+    const { immatriculation } = req.params;
+
+    Car.findOneAndDelete({ "immatriculation": immatriculation })
+        .then(doc => {
+            if (doc) {
+                console.log("Voiture supprimée avec succès :", doc);
+                res.status(200).json(doc);
+            } else {
+                console.log("Voiture non trouvée.");
+                res.status(404).json({ message: "Voiture non trouvée" });
+            }
+        })
+        .catch(err => {
+            console.error("Erreur lors de la suppression de la voiture :", err);
+            res.status(500).json({ error: err });
+        });
+}
+
   
   // Supprimer une voiture par sa plaque
   //    const deleteCar = async (req, res) => {

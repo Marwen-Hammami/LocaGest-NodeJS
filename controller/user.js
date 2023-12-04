@@ -4,8 +4,7 @@ import bcrypt from 'bcrypt';
 import transporter from '../emailConfig.js';
 import otpGenerator from 'otp-generator';
 import jwt from 'jsonwebtoken';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import passport from 'passport';
+
 import twilio from 'twilio';
 
 
@@ -14,75 +13,6 @@ const saltRounds = 10;
 const secretKey = '756d47db75d3e5fdd75aed04700046c52f0d6125ac8ba18eba1b4c3c3552aadf';
 const OTP_EXPIRATION_TIME = 10 * 60 * 1000; // 10 minutes in milliseconds
 
-passport.use(
-    new GoogleStrategy(
-      {
-        clientID: '265542831341-d2qpdet2qq0p6jq50t2h0akiqi96ju7k.apps.googleusercontent.com',
-        clientSecret: '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',
-        callbackURL: 'http://localhost:9090/auth/google/callback', // Replace with your callback URL
-      },
-      (accessToken, refreshToken, profile, done) => {
-        // Use the Google profile information to create or retrieve a user in your database
-        User.findOne({ googleId: profile.id }, (err, user) => {
-          if (err) {
-            return done(err);
-          }
-          if (!user) {
-            // Create a new user with Google profile information
-            const newUser = new User({
-              googleId: profile.id,
-              username: profile.displayName,
-              email: profile.emails[0].value,
-              // ... Other fields you want to save
-            });
-  
-            newUser.save((err) => {
-              if (err) {
-                return done(err);
-              }
-              return done(null, newUser);
-            });
-          } else {
-            // User already exists, return the user
-            return done(null, user);
-          }
-        });
-      }
-    )
-  );
-  
-  // Serialize user information into a session
-  passport.serializeUser((user, done) => {
-    done(null, user.id);
-  });
-  
-  // Deserialize user from a session
-  passport.deserializeUser((id, done) => {
-    User.findById(id, (err, user) => {
-      done(err, user);
-    });
-  });
-  
-  
-  
-  // Google Sign-Up initiation
-  export const googleSignUp = passport.authenticate('google', {
-    scope: ['profile', 'email'],
-  });
-  
-  // Google Sign-Up callback
-  export const googleSignUpCallback = passport.authenticate('google', {
-    failureRedirect: '/login', // Redirect to login page on failure
-    session: false, // Do not use session, rely on tokens
-  });
-  
-  // Handle the result of Google Sign-Up
-  export const handleGoogleSignUpResult = (req, res) => {
-    const { user } = req;
-    const token = jwt.sign({ id: user.id, email: user.email }, secretKey);
-  
-    res.status(200).json({ user, token });
-  };
 
 // Create a new user
 export function createUser(req, res) {
@@ -154,6 +84,23 @@ export function createUser(req, res) {
         });
 }
 
+// Get a user by ID
+export function getUserById(req, res) {
+    const userId = req.params.id;
+
+    User.findById(userId)
+        .then(user => {
+            if (user) {
+                res.status(200).json(user);
+            } else {
+                res.status(404).json({ error: 'User not found.' });
+            }
+        })
+        .catch(error => {
+            res.status(500).json({ error: error.message });
+        });
+}
+
 
 // Retrieve all users
 export function getAllUsers(req, res) {
@@ -169,12 +116,10 @@ export function getAllUsers(req, res) {
 // Update a user
 export function updateUser(req, res) {
     const userId = req.params.id;
-    const { username, email, password, firstName, lastName, creditCardNumber, rate, specialization, experience, roles } = req.body;
+    const { username, firstName, lastName, creditCardNumber, rate, specialization, experience, roles } = req.body;
 
     User.findByIdAndUpdate(userId, {
         username,
-        email,
-        password,
         firstName,
         lastName,
         creditCardNumber,
@@ -206,51 +151,53 @@ export function deleteUser(req, res) {
 }
 
 // Sign in a user
-export function signInUser(req, res) {
-    const { email, password } = req.body;
+export async function signInUser(req, res) {
+    try {
+        const { email, password } = req.body;
 
-    // Validate input data
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required fields.' });
+        // Validate input data
+        if (!email || !password) {
+            return res.status(400).json({ success: false, error: 'Email and password are required fields.' });
+        }
+
+        // Sanitize the email input
+        const sanitizedEmail = validator.escape(email);
+
+        // Find the user by email
+        const user = await User.findOne({ email: sanitizedEmail });
+
+        if (!user) {
+            return res.status(400).json({ success: false, error: 'Invalid email or password.' });
+        }
+
+        // Compare the provided password with the stored hashed password
+        const result = await bcrypt.compare(password, user.password);
+
+        if (result) {
+            // If they match, generate a token
+            const userData = {
+                _id: user.id,
+                username: user.username,
+                email: user.email,
+                namel: user.lastName
+                // Include other necessary fields like firstName, lastName, etc.
+            };
+
+            const token = jwt.sign({ user: user }, secretKey, { expiresIn: '1h' });
+
+            // Send the response
+            return res.status(200).json({ success: true, user: userData, token });
+        }
+
+        return res.status(400).json({ success: false, error: 'Invalid email or password.' });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
     }
-
-    // Sanitize the email input
-    const sanitizedEmail = validator.escape(email);
-
-    // Find the user by email
-    User.findOne({ email: sanitizedEmail })
-        .then(user => {
-            if (!user) {
-                return res.status(400).json({ error: 'Invalid email or password.' });
-            }
-
-            // Compare the provided password with the stored hashed password
-            bcrypt.compare(password, user.password)
-                .then((result) => {
-                    if (result) {
-                        // If they match, return only necessary data
-                        const userData = {
-                            id: user.id,
-                            email: user.email
-                        };
-                        const token = jwt.sign(userData, secretKey);
-
-                        res.status(200).json({ userData, token });
-                    } else {
-                        res.status(400).json({ error: 'Invalid email or password.' });
-                    }
-                })
-                .catch((error) => {
-                    res.status(500).json({ error: error.message });
-                });
-        })
-        .catch(error => {
-            res.status(500).json({ error: error.message });
-        });
 }
 
+
 const accountSid = 'ACf91e1b74b1c8896aa6888016ab2aa3ee';
-const authToken = '2d6b5355e3054db73650ec91c3be29ae';
+const authToken = '4298c71c8a3c7534e758939176d3cd2d';
 const twilioPhoneNumber = '+12512209884';
 const client = twilio(accountSid, authToken);
 

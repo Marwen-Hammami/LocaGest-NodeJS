@@ -52,7 +52,7 @@ const userSchema = new Schema({
     type : Boolean,
     default : false 
   },
-  phoneNumber : 
+  token : 
   {
     type : String,
     default: null
