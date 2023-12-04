@@ -12,7 +12,8 @@ export function addOne(req, res) {
                 members: req.body.members,
                 isGroup: req.body.isGroup,
                 name: req.body.name,
-                image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
+                image: `https://locagest.onrender.com/img/${req.file.filename}`,
+                // image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
             }
         }else{
             jsonaddReq = {
