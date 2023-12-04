@@ -26,6 +26,7 @@ const port = process.env.PORT || 9090;
 const hostname = '127.0.0.1'
 const databaseName = 'locagest';
 const db_url = process.env.DB_URL || `mongodb://localhost:27017`;
+const db_url_atlas = process.env.DB_URL_ATLAS || 'mongodb+srv://topadmin:topadmin@locagest.lehscxo.mongodb.net/?retryWrites=true&w=majority';
 
 
 // Debut connexion à mongodb **********************************
@@ -36,7 +37,7 @@ mongoose.Promise = global.Promise
 
 //Se connecter à MongoDB : old : .connect(`mongodb://${hostname}:27017/${databaseName}`)
 mongoose
-    .connect(`${db_url}/${databaseName}`)
+    .connect(db_url_atlas)
     .then(() => {
         console.log(`Connected to ${databaseName}`)
     })
