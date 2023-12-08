@@ -19,7 +19,7 @@ const carSchema = new Schema({
     type: String,
     enum: ['Manuelle', 'Automatique'],
   },
-  cylindée:{
+  cylindree:{
     type: String,
     default:'autre'
   } ,
@@ -35,6 +35,10 @@ const carSchema = new Schema({
     type: Number,
     default:5
   },
+  image : {
+    type : String,
+    required: true
+  }
 });
 
 const Car = model('Car', carSchema);
