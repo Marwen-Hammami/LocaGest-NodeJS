@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, getUserById,getAllUsers, updateUser, deleteUser , signInUser ,forgotPassword , resetPassword ,verifyEmail, forgotPasswordSMS  } from '../controller/user.js';
+import { createUser,getAllUsers, updateUser, deleteUser , signInUser ,forgotPassword , resetPassword ,verifyEmail, forgotPasswordSMS, updateUserUsername, updateUserPhone, updateUserEmail,newPassword, updateUserPassword , GetUser, verifyOTP  } from '../controller/user.js';
 import { authenticate } from '../middlewares/authenticate.js';
 
 
@@ -19,6 +19,12 @@ router.post('/reset-password', resetPassword);
 // Reset password WITH SMS
 router.post('/sms', forgotPasswordSMS);
 
+router.post('/newpass', newPassword);
+
+router.post('/otp', verifyOTP);
+
+
+
 
 //verify via mail
 router.get('/verify-email', verifyEmail);
@@ -32,15 +38,21 @@ router.get('/', getAllUsers);
 
 // Update a user
 router.put('/:id', updateUser);
+router.put('/username/:id', updateUserUsername);
 
-router.get('/:id', getUserById);
+router.put('/phone/:id', updateUserPhone);
+router.put('/email/:id', updateUserEmail);
+router.put('/pass/:id', updateUserPassword);
 
 
-router.use(authenticate);
+
+router.get('/get/:id', GetUser);
+
+
 
 
 // Delete a user
-router.delete('/:id', deleteUser);
+router.delete('/delete/:id', deleteUser);
 
 
 
