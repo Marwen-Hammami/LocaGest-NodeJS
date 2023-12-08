@@ -1,18 +1,28 @@
-import mongoose from "mongoose";
+// Importer le module express
+import express from 'express';
+import { body } from "express-validator";
 
-const {Schema, model} = mongoose;
+// Importer le controller car
+import { addOne, getAllAgences, updateAgence, deleteAgence } from "../controllers/Agence.js";
 
-const agenceSchema = new Schema({
-    AgenceName: String,
-    Adresse: String,
-    IdHead: {
-        type: Schema.Types.ObjectId,
-        ref: "User"
-    },
-    longitude: Number,
-    latitude: Number,
-});
+// Créer un objet router
+const router = express.Router();
 
-const Agence = model('Agence', agenceSchema);
 
-export default Agence;
+// // Définir les routes pour les différentes méthodes de requête
+router
+.route("/")
+.get(getAllAgences)
+
+router
+.route("/new")
+.post(
+    addOne
+)
+router
+.route("/:id")
+.put(updateAgence)
+.delete(deleteAgence)
+
+// Exporter le router
+export default router;

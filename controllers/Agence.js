@@ -2,19 +2,20 @@ import Agence from '../models/Agence.js';
 
 // Créer une nouvelle Agence
   export function addOne(req, res) {
-      console.log(req.body)
+    console.log(req.body)
     Agence.create(req.body)
         .then((newAgence) => {
           res.status(200).json(newAgence);
         })
         .catch((err) => {
+          console.log(err)
           res.status(500).json({ error: err });
         });
     }
 
   // Obtenir la liste de toutes les Agences
   export function getAllAgences(req, res) {
-    Agence.find({}).populate("IdHead")
+    Agence.find({})
       .then((agences) => {
         res.status(200).json(agences);
       })

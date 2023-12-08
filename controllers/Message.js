@@ -3,6 +3,9 @@ import { validationResult } from "express-validator"
 
 //Créer un message
 export function addOne(req, res) {
+    console.log(req.body)
+    console.log(req.file)
+
     if (!validationResult(req).isEmpty()) {
         res.status(400).json({ errors: validationResult(req).array() })
     }else {
@@ -27,7 +30,8 @@ export function addOne(req, res) {
             var fileUrls = []
             for(const file of req.files) {
                 // fileUrls.push(`${req.protocol}://${req.get('host')}/img/${file.filename}`)
-                fileUrls.push(`https://locagest.onrender.com/img/${file.filename}`)
+                // fileUrls.push(`https://locagest.onrender.com/img/${file.filename}`)
+                fileUrls.push(`http://192.168.1.16:9090/img/${file.filename}`)
             }
             jsonaddReq = {
                 conversationId: convIdString,
