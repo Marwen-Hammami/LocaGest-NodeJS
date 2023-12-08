@@ -32,7 +32,7 @@ router.delete('/:id', deleteReservation);
 router.post('/create-intent', async (req, res) => {
   try {
     var args = {
-      amount: 1099,
+      amount: 500,
       currency: 'usd',
       // In the latest version of the API, specifying the automatic_payment_methods parameter is optional because Stripe enables its functionality by default.
       automatic_payment_methods: {enabled: true},
@@ -55,7 +55,7 @@ router.post('/payment-sheet', async (req, res) => {
     {apiVersion: '2023-10-16'}
   );
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: 1099,
+    amount: 500,
     currency: 'eur',
     customer: customer.id,
     // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
