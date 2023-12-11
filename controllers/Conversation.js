@@ -13,7 +13,8 @@ export function addOne(req, res) {
                 members: req.body.members,
                 isGroup: req.body.isGroup,
                 name: req.body.name,
-                image: `https://locagest.onrender.com/img/${req.file.filename}`,
+                // image: `https://locagest.onrender.com/img/${req.file.filename}`,
+                image: `http://192.168.1.16:9090/img/${req.file.filename}`,
                 // image: `${req.protocol}://${req.get('host')}/img/${req.file.filename}`,
             }
         }else{
