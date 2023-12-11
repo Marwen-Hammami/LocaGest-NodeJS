@@ -1,9 +1,21 @@
 import Message from '../models/Message.js'
 import { validationResult } from "express-validator"
 
-// import OpenAI from "openai";
+// Debut OpenAI API Config **************************************
+import dotenv from 'dotenv';
+dotenv.config();
 
-// const openai = new OpenAI();
+import OpenAI from 'openai';
+
+const apiKey = process.env.OPEN_AI_KEY; // Ensure the variable name matches your .env file
+
+if (!apiKey) {
+  throw new Error('API key not found or empty. Set OPEN_AI_KEY in your .env file.');
+}
+
+const openai = new OpenAI({ apiKey: apiKey });
+
+// Fin OpenAI API Config ****************************************
 
 //Créer un message
 export function addOne(req, res) {
@@ -87,10 +99,40 @@ export function deleteOne(req, res) {
 
     //le chatbot de openai  
     export async function sendMessageToChatBot(req, res) {
-    //     const completion = await openai.chat.completions.create({
-    //         messages: [{ role: "system", content: "You are a helpful assistant." }],
-    //         model: "gpt-3.5-turbo",
-    //       });
+        try {
+            //get chat history of conv
+            const { userMessage, idConv } = req.body;
+
+            //get user reservations
+            //make it possible to rent a car
+            const systemMessage = 'You are CarRentalBot, a knowledgeable assistant from LocaGest Car Rentals. Provide helpful information and assistance to our customers. Respond in the language of the user.';
         
-    //       console.log(completion.choices[0]);
+            // Construct messages array with system role and user role
+            const messages = [
+              { role: 'system', content: systemMessage },
+              { role: 'user', content: userMessage },
+            ];
+        
+            // Add historical messages to the chat
+            if (idConv) {
+              messages.push(...idConv.map((message) => ({ role: 'assistant', content: message })));
+            }
+        
+            // Make the API call to OpenAI
+            const completion = await openai.chat.completions.create({
+              messages: messages,
+              model: 'gpt-3.5-turbo',
+            });
+        
+            // Extract the assistant's reply
+            const assistantReply = completion.choices[0].message.content;
+        
+            // You can save the assistantReply to your database or perform any other necessary actions
+        
+            // Send the response back to the client
+            res.json({ assistantReply });
+          } catch (error) {
+            console.error('Error sending message to chatbot:', error.message);
+            res.status(500).json({ error: 'Internal Server Error' });
+          }
     }
