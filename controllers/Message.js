@@ -86,11 +86,11 @@ export function deleteOne(req, res) {
 }
 
     //le chatbot de openai  
-    // export async function sendMessageToChatBot(req, res) {
+    export async function sendMessageToChatBot(req, res) {
     //     const completion = await openai.chat.completions.create({
     //         messages: [{ role: "system", content: "You are a helpful assistant." }],
     //         model: "gpt-3.5-turbo",
     //       });
         
     //       console.log(completion.choices[0]);
-    // }
+    }
