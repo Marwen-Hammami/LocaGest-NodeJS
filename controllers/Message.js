@@ -1,9 +1,9 @@
 import Message from '../models/Message.js'
 import { validationResult } from "express-validator"
 
-import OpenAI from "openai";
+// import OpenAI from "openai";
 
-const openai = new OpenAI();
+// const openai = new OpenAI();
 
 //Créer un message
 export function addOne(req, res) {
@@ -86,11 +86,11 @@ export function deleteOne(req, res) {
 }
 
     //le chatbot de openai  
-    export async function sendMessageToChatBot(req, res) {
-        const completion = await openai.chat.completions.create({
-            messages: [{ role: "system", content: "You are a helpful assistant." }],
-            model: "gpt-3.5-turbo",
-          });
+    // export async function sendMessageToChatBot(req, res) {
+    //     const completion = await openai.chat.completions.create({
+    //         messages: [{ role: "system", content: "You are a helpful assistant." }],
+    //         model: "gpt-3.5-turbo",
+    //       });
         
-          console.log(completion.choices[0]);
-    }
+    //       console.log(completion.choices[0]);
+    // }
