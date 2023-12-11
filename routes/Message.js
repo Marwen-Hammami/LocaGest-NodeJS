@@ -1,7 +1,7 @@
 import express from 'express'
 import { body } from "express-validator"
 
-import { addOne, getAllWithIdConv, deleteOne } from "../controllers/Message.js";
+import { addOne, getAllWithIdConv, deleteOne, sendMessageToChatBot } from "../controllers/Message.js";
 import { multipleFileUpload } from "../middlewares/multer-config.js";
 
 const router = express.Router()
@@ -22,5 +22,10 @@ router
 .route('/:id')
 .get(getAllWithIdConv)
 .delete(deleteOne)
+
+//Les routes pour le chatbot de openai
+router
+.route('/chatBot')
+.post(sendMessageToChatBot)
 
 export default router
