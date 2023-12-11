@@ -13,11 +13,12 @@ const router = express.Router();
 router
 .route("/")
 .get(getAllAgences)
+
+router
+.route("/new")
 .post(
-    body("AgenceName").isString(),    //faire le controle pour les autres champs
     addOne
 )
-
 router
 .route("/:id")
 .put(updateAgence)
