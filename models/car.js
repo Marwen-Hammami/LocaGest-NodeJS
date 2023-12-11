@@ -3,9 +3,18 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
 const carSchema = new Schema({
-  immatriculation: String,
-  marque: String,
-  modele: String,
+  immatriculation:  {
+    type : String,
+    required: true
+  },
+  marque:  {
+    type : String,
+    required: true
+  },
+  modele:  {
+    type : String,
+    required: true
+  },
   type: {
     type: String,
     enum: ['Sedan', 'SUV', 'Hatchback', 'Convertible', 'Truck','Sportive', 'autre'],
@@ -22,6 +31,7 @@ const carSchema = new Schema({
   cylindree:{
     type: String,
     default:'autre'
+    
   } ,
   disponibility: {
     type: String,

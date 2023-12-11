@@ -1,9 +1,11 @@
-import Car from '../models/car.js'; 
+import Car from '../models/car.js';
+import { validationResult } from "express-validator"; 
 
 // Créer une nouvelle voiture
-export async function addOnce(req, res) {
+/*export async function addOnce(req, res) {
   try {
     console.log(req.body);
+    console.log(req.file);
 
     let newCar = await Car.create({
       immatriculation: req.body.immatriculation,
@@ -11,7 +13,7 @@ export async function addOnce(req, res) {
       boite: req.body.boite,
       carburant: req.body.carburant,
       marque: req.body.marque,
-      image: `${req.protocol}://${req.get("host")}/img/${req.file.filename}`
+      image: req.file.filename
     });
 
     res.status(200).json({
@@ -20,10 +22,38 @@ export async function addOnce(req, res) {
       boite: newCar.boite,
       carburant: newCar.carburant,
       marque: newCar.marque,
+      image: newCar.image
     });
   } catch (err) {
     res.status(500).json({ error: err.message || "Internal Server Error" });
   }
+}*/
+
+
+
+
+export function addOnce(req, res) {
+
+  console.log(req.body);
+  console.log(req.file);
+  if (!validationResult(req).isEmpty()) {
+      console.log({ errors: validationResult(req).array() })
+      return res.status(400).json({ errors: validationResult(req).array() });
+  } else {
+      Car.create({
+        immatriculation: req.body.immatriculation,
+        modele: req.body.modele,
+        boite: req.body.boite,
+        carburant: req.body.carburant,
+        marque: req.body.marque,
+        image: req.file.filename
+      })
+          .then(() => res.status(201).json("OK"))
+          .catch((err) => {
+              res.status(500).json({ error: err.message });
+          });
+  }
+
 }
 
   // }
@@ -76,7 +106,7 @@ export async function addOnce(req, res) {
             carburant: req.body.carburant,
             marque: req.body.marque,
             cylindree: req.body.cylindree,
-            image: `${req.protocol}://${req.get("host")}/img/${req.file.filename}`,
+            image: req.file.filename
           }
         : {
             immatriculation: immatriculationToUpdate,

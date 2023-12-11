@@ -8,20 +8,18 @@ import multerConfig from '../middlewares/multer-config.js';
 // Créer un objet router
 const router = express.Router();
 
-const upload = multerConfig('image', {fileSize: 5 * 1024 * 1024});
+
 // // Définir les routes pour les différentes méthodes de requête
 router
-.route("/")
-.get(getAllCars)
-.post(
-    body("Marque").isString(),  
-    upload,  //faire le controle pour les autres champs
-    addOnce
-)
+    .route('/')
+    .post(multerConfig,
+        [body("marque").isString()],  
+        addOnce)
+    .get(getAllCars);
 
 router
 .route("/:immatriculation")
-.put(updateCar)
+.put(multerConfig,updateCar)
 .delete(deleteCar)
 
 // Exporter le router

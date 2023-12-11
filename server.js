@@ -41,6 +41,7 @@ mongoose
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use('/img', express.static('public/images'));
 //Fin Appel des MiddleWares *********************************** 
