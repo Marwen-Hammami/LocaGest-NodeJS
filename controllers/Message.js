@@ -88,14 +88,16 @@ export function getAllWithIdConv(req, res) {
 //Supprimer un message
 export function deleteOne(req, res) {
     Message
-    .findOneAndRemove({ "_id" : req.params.id})
-    .then(doc => {
-        res.status(200).json(doc)
+    .findById(req.params.id)
+    .then(message => {
+        message.Supprime = true
+        res.status(200).json(message)
     })
     .catch(err => {
         res.status(500).json({error: err})
     })
 }
+//Methode archiver le message
 
     //le chatbot de openai  
     export async function sendMessageToChatBot(req, res) {

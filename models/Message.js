@@ -18,6 +18,14 @@ const messageSchema = new Schema(
         file: {
             type: Array,
             required: false
+        },
+        Archive:{
+            type: Boolean,
+            default: false
+        },
+        Supprime:{
+            type: Boolean,
+            default: false
         }
     },
     {
