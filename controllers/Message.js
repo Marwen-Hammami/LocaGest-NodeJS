@@ -1,4 +1,5 @@
 import Message from '../models/Message.js'
+import Signalement from '../models/Signalement.js';
 import { validationResult } from "express-validator"
 
 // Debut OpenAI API Config **************************************
@@ -97,7 +98,58 @@ export function deleteOne(req, res) {
         res.status(500).json({error: err})
     })
 }
+
 //Methode archiver le message
+export function archiveOne(req, res) {
+    Message
+    .findById(req.params.id)
+    .then(message => {
+        message.Archive = !message.Archive
+        res.status(200).json(message)
+    })
+    .catch(err => {
+        res.status(500).json({error: err})
+    })
+}
+
+//Signaler un message
+export function SignalerMessage(req, res) {
+    //request the ai do treat the signalement
+
+    //if traité else false
+    Signalement
+        .create(req.body)
+        .then(newSignalement => {
+            res.status(200).json(newSignalement)
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+}
+//Modifier Signalement d'message
+export function ModifierSignalement(req, res) {
+    Signalement
+        .findById(req.body._id)
+        .then(signalement => {
+            signalement.traite = req.body.traite
+            signalement.save()
+            res.status(200).json(signalement)
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+}
+//Liste des Signalements
+export function ListSignalements(req, res) {
+    Signalement
+    .find()
+    .then(listSignalements => {
+        res.status(200).json(listSignalements)
+    })
+    .catch(err => {
+        res.status(500).json({error: err})
+    })
+}
 
     //le chatbot de openai  
     export async function sendMessageToChatBot(req, res) {

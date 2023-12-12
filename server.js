@@ -19,6 +19,7 @@ import Reservation from './routes/reservation.js';
 import Historique from './routes/historique.js';
 import Distribution from './routes/distribution.js';
 import Tools from './routes/tools.js';
+import BannedWords from './routes/BannedWords.js';
 import socketController from './socket/socketController.js';
 
 const app = express();
@@ -69,6 +70,7 @@ app.use('/car', car)
 app.use('/User', user);
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
+app.use('/bannedWords', BannedWords);
 
 app.use('/distribution', Distribution);
 app.use('/tools', Tools);
