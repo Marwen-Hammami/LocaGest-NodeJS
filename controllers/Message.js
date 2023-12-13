@@ -19,7 +19,7 @@ const openai = new OpenAI({ apiKey: apiKey });
 // Fin OpenAI API Config ****************************************
 
 //Créer un message
-export function addOne(req, res) {
+export function addOne(req, res) {  //get bad words list and iterate
     console.log(req.body)
     console.log(req.file)
 
@@ -92,6 +92,7 @@ export function deleteOne(req, res) {
     .findById(req.params.id)
     .then(message => {
         message.Supprime = true
+        message.save()
         res.status(200).json(message)
     })
     .catch(err => {
@@ -105,6 +106,7 @@ export function archiveOne(req, res) {
     .findById(req.params.id)
     .then(message => {
         message.Archive = !message.Archive
+        message.save()
         res.status(200).json(message)
     })
     .catch(err => {
@@ -113,25 +115,73 @@ export function archiveOne(req, res) {
 }
 
 //Signaler un message
-export function SignalerMessage(req, res) {
-    //request the ai do treat the signalement
+export async function SignalerMessage(req, res) {
+    //get the message text from the id
+    Message.findById(req.body.messageId)
+    .then(async message => {
 
-    //if traité else false
-    Signalement
-        .create(req.body)
-        .then(newSignalement => {
-            res.status(200).json(newSignalement)
-        })
-        .catch(err => {
-            res.status(500).json({error: err})
-        })
+        //request the ai do treat the signalement
+        const moderation = await openai.moderations.create({ input: message.text });
+
+        console.log("moderation.results[0].flagged : "+ moderation.results[0].flagged);
+
+        if(moderation.results[0].flagged == true){
+            //Archiver le message (visible seulement grace au liens au signalement)
+            message.Archive = true
+            message.save()
+            //Traiter le signalement en cas de positif
+            var sign = Signalement(req.body)
+            sign.traite = true
+            sign.traiteAutomatiquement = true
+            sign.signalementPertinant = true
+
+            Signalement
+            .create(sign)
+            .then(newSignalement => {
+                res.status(200).send("Le message signalé a été supprimé.")
+            })
+            .catch(err => {
+                res.status(500).json({error: err})
+            })
+        } else if (moderation.results[0].flagged == false){
+            //Traiter le signalement en cas de negatif
+            var sign = Signalement(req.body)
+            sign.traite = true
+            sign.traiteAutomatiquement = true
+            sign.signalementPertinant = false
+
+            Signalement
+            .create(sign)
+            .then(newSignalement => {
+                res.status(201).send("Le signalement as bien été pris en compte, mais le message ne seras pas supprimé car il n'enfrein pas notre politique d'utilisation.")
+            })
+            .catch(err => {
+                res.status(500).json({error: err})
+            })
+        } else {
+            //en cas d'absence de la variable moderation.results[0].flagged, traitement futur pour l'administrateur
+            Signalement
+            .create(req.body)
+            .then(newSignalement => {
+                res.status(201).send("Le signalement as bien été pris en compte, et sera traité sous les plus brefs délais")
+            })
+            .catch(err => {
+                res.status(500).json({error: err})
+            })
+        }
+    })
+    .catch(err => {
+        res.status(500).json({error: err})
+    })
 }
+
 //Modifier Signalement d'message
 export function ModifierSignalement(req, res) {
     Signalement
         .findById(req.body._id)
         .then(signalement => {
             signalement.traite = req.body.traite
+            signalement.traiteAutomatiquement = req.body.traiteAutomatiquement
             signalement.save()
             res.status(200).json(signalement)
         })
@@ -190,3 +240,43 @@ export function ListSignalements(req, res) {
             res.status(500).json({ error: 'Internal Server Error' });
           }
     }
+
+
+
+    /* OpenAI Moderation API Result:
+{
+  "id": "modr-XXXXX",
+  "model": "text-moderation-005",
+  "results": [
+    {
+      "flagged": true,
+      "categories": {
+        "sexual": false,
+        "hate": false,
+        "harassment": false,
+        "self-harm": false,
+        "sexual/minors": false,
+        "hate/threatening": false,
+        "violence/graphic": false,
+        "self-harm/intent": false,
+        "self-harm/instructions": false,
+        "harassment/threatening": true,
+        "violence": true,
+      },
+      "category_scores": {
+        "sexual": 1.2282071e-06,
+        "hate": 0.010696256,
+        "harassment": 0.29842457,
+        "self-harm": 1.5236925e-08,
+        "sexual/minors": 5.7246268e-08,
+        "hate/threatening": 0.0060676364,
+        "violence/graphic": 4.435014e-06,
+        "self-harm/intent": 8.098441e-10,
+        "self-harm/instructions": 2.8498655e-11,
+        "harassment/threatening": 0.63055265,
+        "violence": 0.99011886,
+      }
+    }
+  ]
+}
+    */
