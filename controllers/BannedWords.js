@@ -14,14 +14,24 @@ export function getAll(req, res) {
 
 export function addOne(req, res) {
     req.body.word = req.body.word.toLowerCase();
-    BannedWords
-    .create(req.body)
-    .then(newBannedWord => {
-        res.status(200).json(newBannedWord)
-    })
-    .catch(err => {
-        res.status(500).json({error: err})
-    })
+
+    BannedWords.findOne({ word: req.body.word })
+        .then(existingWord => {
+            if (existingWord) {
+                res.status(400).json({ error: 'Le mot existe déjà.' });
+            } else {
+                BannedWords.create(req.body)
+                    .then(newBannedWord => {
+                        res.status(200).json(newBannedWord);
+                    })
+                    .catch(err => {
+                        res.status(500).json({ error: err });
+                    });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({ error: err });
+        });
 }
 
 export function deleteOne(req, res) {
