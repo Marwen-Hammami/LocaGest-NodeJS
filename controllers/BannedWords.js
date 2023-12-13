@@ -13,6 +13,7 @@ export function getAll(req, res) {
 }
 
 export function addOne(req, res) {
+    req.body.word = req.body.word.toLowerCase();
     BannedWords
     .create(req.body)
     .then(newBannedWord => {
