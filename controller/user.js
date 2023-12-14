@@ -6,6 +6,8 @@ import otpGenerator from 'otp-generator';
 import jwt from 'jsonwebtoken';
 import twilio from 'twilio';
 import { FileUpload } from '../middlewares/multer-config.js';
+import moment from 'moment';
+
 
 
 const saltRounds = 10;
@@ -74,6 +76,100 @@ export function createUser(req, res) {
             specialization,
             experience,
             roles,
+            phoneNumber,
+            creditCardNumber,
+            image,
+            otpCode,
+            otpExpiration,
+            isVerified: false,
+        });
+
+        // Save the user to the database
+        newUser.save()
+            .then(savedUser => {
+                const verificationLink = `http://localhost:9090/User/verify-email?email=${encodeURIComponent(savedUser.email)}&otp=${encodeURIComponent(otpCode)}`;
+
+                const mailOptions = {
+                    from: 'maher.karoui@esprit.tn',
+                    to: savedUser.email,
+                    subject: 'Account Verification',
+                    text: `Thank you for creating an account. Please click on the following link to verify your email:\n\n${verificationLink}`,
+                };
+
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        return res.status(500).json({ error: error.message });
+                    }
+                    res.status(201).json(savedUser);
+                });
+            })
+            .catch(error => {
+                res.status(500).json({ error: error.message });
+            });
+    });
+}
+
+export function createUserAdmin(req, res) {
+    // Use Multer middleware to handle image upload
+    FileUpload(req, res, function (err) {
+        if (err) {
+            console.error('Error uploading image:', err);
+            return res.status(500).json({ error: 'Error uploading image.' });
+        }
+
+        const {
+            username,
+            email,
+            password,
+            firstName,
+            lastName,
+            rate,
+            specialization,
+            experience,
+            roles,
+            phoneNumber,
+            creditCardNumber,
+        } = req.body;
+
+        // Validate input data
+        if (!username || !email || !password) {
+            return res.status(400).json({ error: 'Username, email, and password are required fields.' });
+        }
+
+        // Validate email format
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ error: 'Invalid email format.' });
+        }
+
+        // Validate the roles against a list of allowed roles
+        const allowedRoles = ['admin', 'technician', 'client'];
+        if (!allowedRoles.includes(roles)) {
+            return res.status(400).json({ error: 'Invalid roles provided.' });
+        }
+
+        // Hash the password
+        const hashedPassword = bcrypt.hashSync(password, saltRounds);
+
+        // Generate OTP
+        const otpCode = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+
+        // Set the expiration time for OTP
+        const otpExpiration = Date.now() + OTP_EXPIRATION_TIME;
+
+        // Extract image filename from Multer
+        const image = req.file ? req.file.filename : null;
+
+        // Create a new user instance
+        const newUser = new User({
+            username,
+            email,
+            password: hashedPassword,
+            firstName,
+            lastName,
+            rate,
+            specialization,
+            experience,
+            roles:'admin', // Set the default role as "admin"
             phoneNumber,
             creditCardNumber,
             image,
@@ -258,7 +354,63 @@ export async function updateUserPassword(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
-
+export async function banUser(req, res) {
+    try {
+      const userId = req.params.id;
+      
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      user.isBanned = true;
+      const bannedUser = await user.save();
+  
+      res.status(200).json(bannedUser);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+  
+  // Unban a user
+  export async function unbanUser(req, res) {
+    try {
+      const userId = req.params.id;
+      
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      user.isBanned = false;
+      const unbannedUser = await user.save();
+  
+      res.status(200).json(unbannedUser);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+  
+  // Ban a user with duration
+  export async function banUserWithDuration(req, res) {
+    try {
+      const userId = req.params.id;
+      const { duration } = req.body;
+      
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      user.isBanned = true;
+      user.banExpiration = moment().add(duration, 'minutes');
+      const bannedUser = await user.save();
+  
+      res.status(200).json(bannedUser);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 
 // Get a user by ID
 export function GetUser(req, res) {
@@ -311,6 +463,43 @@ export function updateUser(req, res) {
         });
 }
 
+export async function updateRoleByUsername(username, newRole) {
+    try {
+      const user = await User.findOne({ username });
+  
+      if (!user) {
+        // User not found
+        return { success: false, message: 'User not found' };
+      }
+  
+      // Update the role
+      user.roles = newRole;
+      await user.save();
+  
+      return { success: true, message: 'Role updated successfully' };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+
+  export async function updateRoleByEmail(email, newRole) {
+    try {
+      const user = await User.findOne({ email });
+  
+      if (!user) {
+        // User not found
+        return { success: false, message: 'User not found' };
+      }
+  
+      // Update the role
+      user.roles = newRole; // Assuming newRole is a valid role value ('technicien', 'admin', or 'client')
+      await user.save();
+  
+      return { success: true, message: 'Role updated successfully' };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
 
 
 
@@ -371,6 +560,54 @@ export function signInUser(req, res) {
             res.status(500).json({ error: error.message });
         });
 }
+
+export function signInUserAdmin(req, res) {
+    const { email, password } = req.body;
+  
+    // Validate input data
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required fields.' });
+    }
+  
+    // Sanitize the email input
+    const sanitizedEmail = validator.escape(email);
+  
+    // Find the user by email
+    User.findOne({ email: sanitizedEmail })
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({ error: 'Invalid email or password.' });
+        }
+  
+        // Compare the provided password with the stored hashed password
+        bcrypt.compare(password, user.password)
+          .then((result) => {
+            if (result) {
+              // Check if the user has the 'admin' role
+              if (user.roles === 'admin') {
+                // If they match and the user has the 'admin' role, return only necessary data
+                const userData = {
+                  id: user.id,
+                  email: user.email
+                };
+                const token = jwt.sign(userData, secretKey);
+  
+                res.status(200).json({ userData, token });
+              } else {
+                res.status(403).json({ error: 'Access denied. Only users with the admin role can sign in.' });
+              }
+            } else {
+              res.status(400).json({ error: 'Invalid email or password.' });
+            }
+          })
+          .catch((error) => {
+            res.status(500).json({ error: error.message });
+          });
+      })
+      .catch(error => {
+        res.status(500).json({ error: error.message });
+      });
+  }
 
 const accountSid = 'ACf91e1b74b1c8896aa6888016ab2aa3ee';
 const authToken = '85479a5ad6341e434caf2e8ec9fa35e2';
@@ -533,6 +770,16 @@ export async function verifyOTP(req, res) {
     } catch (error) {
       console.log('Error updating password:', error.message);
       res.status(500).json({ error: error.message });
+    }
+  }
+
+  export async function getUserCount() {
+    try {
+      const count = await User.countDocuments();
+      return count;
+    } catch (error) {
+      console.error('Failed to get user count:', error);
+      throw error;
     }
   }
 
