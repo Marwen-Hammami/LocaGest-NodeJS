@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser,getAllUsers,updateRoleByEmail, updateUser, deleteUser, getUserCount ,createUserAdmin, signInUser ,forgotPassword , resetPassword ,verifyEmail, forgotPasswordSMS, updateUserUsername, updateUserPhone, updateUserEmail,newPassword, updateUserPassword , GetUser, verifyOTP, updateRoleByUsername, signInUserAdmin, banUser, unbanUser, banUserWithDuration  } from '../controller/user.js';
+import { createUser,getAllUsers,updateRoleByEmail, updateUser, deleteUser, getUserCount ,createUserAdmin, signInUser ,forgotPassword , resetPassword ,verifyEmail, forgotPasswordSMS, updateUserUsername, updateUserPhone, updateUserEmail,newPassword, updateUserPassword , GetUser, verifyOTP, updateRoleByUsername, signInUserAdmin, banUser, unbanUser, banUserWithDuration  } from '../controllers/user.js';
 import { authenticate } from '../middlewares/authenticate.js';
 
 
