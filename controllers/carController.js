@@ -46,7 +46,7 @@ export function addOnce(req, res) {
         boite: req.body.boite,
         carburant: req.body.carburant,
         marque: req.body.marque,
-        image: req.file.filename
+        image: "1702314813552.jpg"
       })
           .then(() => res.status(201).json("OK"))
           .catch((err) => {

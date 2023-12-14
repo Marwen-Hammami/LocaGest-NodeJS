@@ -23,23 +23,26 @@ const carSchema = new Schema({
   carburant: {
     type: String,
     enum: ['Essence', 'Diesel', 'Electrique', 'Hybride', 'autre'],
+    default:'Essence'
   },
   boite: {
     type: String,
     enum: ['Manuelle', 'Automatique'],
+    default:'Manuelle'
   },
   cylindree:{
     type: String,
-    default:'autre'
+    default:'Manuelle'
     
   } ,
   disponibility: {
     type: String,
     enum: ['Disponible', 'Louée', 'Maintenance', 'autre'],
+    default:'Disponible'
   },
   etatVoiture: {
     type: String,
-    default:'autre'
+    default:'Essence'
   },
   prixParJour:{
     type: Number,
@@ -47,7 +50,7 @@ const carSchema = new Schema({
   },
   image : {
     type : String,
-    required: true
+    required: false
   }
 });
 

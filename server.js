@@ -10,6 +10,10 @@ import car from "./routes/car.js";
 // import accidents from './routes/accidents.js';
 // import geolocalisation from './routes/geolocalisation.js';
 // import historique_entretiens from './routes/historique_entretien.js'
+import historiqueEntretienRoutes from './routes/historique_entretien.js'
+
+
+
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -49,7 +53,11 @@ app.use('/img', express.static('public/images'));
 
 //Debut Appel des Routes **************************************
 // app.use('/accidents', accidents);
-app.use('/car', car)
+app.use('/car', car);
+app.use('/historique_entretien', historiqueEntretienRoutes);
+
+
+
 
 //Fin Appel des Routes ****************************************
 
