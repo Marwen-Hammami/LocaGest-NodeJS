@@ -38,6 +38,14 @@ const userSchema = new Schema({
     type: String,
     default: null
   },
+  phoneNumber : {
+    type:String,
+     default: null
+  },
+  image : {
+    type:String,
+     default: null
+  },
   experience: {
     type: Number,
     default: null
@@ -48,6 +56,11 @@ const userSchema = new Schema({
     default: 'client'
   },
   isVerified : 
+  {
+    type : Boolean,
+    default : false 
+  },
+  isBanned : 
   {
     type : Boolean,
     default : false 
