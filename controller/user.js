@@ -443,7 +443,7 @@ export function getAllUsers(req, res) {
 // Update a user
 export function updateUser(req, res) {
     const userId = req.params.id;
-    const { username, email, password, firstName, lastName, creditCardNumber } = req.body;
+    const { username, email, password, firstName, lastName, creditCardNumber,phoneNumber     } = req.body;
 
     User.findByIdAndUpdate(userId, {
         username,
