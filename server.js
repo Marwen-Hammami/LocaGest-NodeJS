@@ -55,23 +55,19 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/img', express.static('public/images'));
-//Fin Appel des MiddleWares *********************************** 
-
-app.use(morgan("dev"));
-
 app.use('/uploads', express.static('uploads'));
+//Fin Appel des MiddleWares *********************************** 
 
 //Debut Appel des Routes **************************************
 
 app.use('/agence', Agence)
-app.use('/res',Reservation); //m3aha hethy
+app.use('/res',Reservation);
 app.use('/histo',Historique);
 app.use('/car', car)
 app.use('/User', user);
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
 app.use('/bannedWords', BannedWords);
-
 app.use('/distribution', Distribution);
 app.use('/tools', Tools);
 //Fin Appel des Routes ****************************************
