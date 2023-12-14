@@ -37,4 +37,20 @@ function makeMulter(multiple) {
     return mult.single("file")
 }
 
+//Classic Multer
+export default multer({
+    storage: diskStorage({
+        destination: (req, file, callback) => {
+            const __dirname = dirname(fileURLToPath(
+                import.meta.url));
+            callback(null, join(__dirname, "../public/images/car"));
+        },
+        filename: (req, file, callback) => {
+            const extension = MIME_TYPES[file.mimetype];
+            callback(null, Date.now() + "." + extension);
+        },
+    }),
+    limits: 512 * 1024,
+}).single("image");
+
 export { FileUpload, multipleFileUpload }
