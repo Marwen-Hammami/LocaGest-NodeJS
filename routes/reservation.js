@@ -4,8 +4,8 @@ import {Stripe} from 'stripe';
 
 
 // Import the Reservation controller
-import { getAllReservations, createReservation, updateReservation, deleteReservation } from '../controllers/reservation.js';
-
+//import { getAllReservations, createReservation, updateReservation, deleteReservation } from '../controllers/reservation.js';
+import { getAllReservations, createReservation, updateReservation, deleteReservation, markReservationAsPaid } from '../controllers/reservation.js';
 // Create a new router
 const router = Router();
 
@@ -27,6 +27,9 @@ router.get('/', getAllReservations);
 router.post('/', createReservation);
 router.put('/:id', updateReservation);
 router.delete('/:id', deleteReservation);
+
+// Define the routes for the Reservation model
+router.put('/updateStatut/:id', markReservationAsPaid);
 
 
 router.post('/create-intent', async (req, res) => {
@@ -71,6 +74,10 @@ router.post('/payment-sheet', async (req, res) => {
     publishableKey: 'pk_test_51OF1qTCCAcch0OaOh4RBDmMrgB2H2fldhAv7VHVTcSVMAMyryPXrYSoZ5Yd4UMGt9PSKhmXSe3b4rzDVp2Jnf61P00LBqL30Oe'
   });
 });
+
+
+
+
 
 // Export the router
 export default router;

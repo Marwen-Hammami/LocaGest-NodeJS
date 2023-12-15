@@ -70,4 +70,35 @@ export async function deleteReservation(req, res) {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+    
+}
+
+// Update a reservation status to 'Payée'
+export async function markReservationAsPaid(req, res) {
+    const reservationId = req.params.id;
+
+    try {
+        // Find the reservation by ID
+        const reservation = await Reservation.findById(reservationId);
+
+        // Check if the reservation exists
+        if (!reservation) {
+            return res.status(404).json({ error: 'Reservation not found' });
+        }
+
+        // Check if the current status is 'Reservée'
+        if (reservation.Statut !== Reservation.StatutRes.Reservee) {
+            return res.status(400).json({ error: 'Reservation must be in status "Reservée" to be marked as "Payée".' });
+        }
+
+        // Update the reservation status to 'Payée'
+        reservation.Statut = Reservation.StatutRes.Payee;
+
+        // Save the updated reservation to the database
+        const updatedReservation = await reservation.save();
+
+        res.status(200).json(updatedReservation);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 }
