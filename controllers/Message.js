@@ -1,7 +1,8 @@
 import Message from '../models/Message.js'
 import Signalement from '../models/Signalement.js';
 import BannedWords from "../models/BannedWords.js"
-// import Car from "../models/car.js"
+import Car from "../models/car.js"
+import Agence from "../models/Agence.js"
 import Conversation from "../models/Conversation.js"
 import { validationResult } from "express-validator"
 
@@ -256,11 +257,11 @@ export async function sendMessageToChatBot(req, res) {
         console.log(messagesHisto);
 
         // Get cars
-        let carList = ""//await Car.find({});
+        let carList = await Car.find({});
         console.log(carList);
 
         // Get agences
-        let agenceList ="" //await Agence.find({});
+        let agenceList = await Agence.find({});
         console.log(agenceList);
 
           //make it possible to rent a car
