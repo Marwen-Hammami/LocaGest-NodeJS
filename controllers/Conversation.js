@@ -1,5 +1,8 @@
 import Conversation from "../models/Conversation.js";
 import { validationResult } from "express-validator"
+import Message from "../models/Message.js";
+
+const chatBotId = "657b52068948af22d02152e1";
 
 //Créer une conversation
 export function addOne(req, res) {
@@ -27,11 +30,35 @@ export function addOne(req, res) {
         Conversation
         .create(jsonaddReq)
         .then(newConv => {
+            //If conv with chatbot then create a welcome message
+            if (newConv.members[1] == chatBotId) {
+                const objectIdString = newConv._id.toString();
+                var jsonaddReq2
+                try {
+                    jsonaddReq2 = {
+                        conversationId: objectIdString,
+                        sender: chatBotId,
+                        text: "Bonjour, comment puis-je vous aider ?",
+                    };
+                } catch (error) {
+                    console.error("Error creating jsonaddReq2:", error);
+                }
+                Message.create(jsonaddReq2)
+                .then((newMessage) => {
+                })
+                .catch(err => {
+                    console.error(err);
+                    res.status(500).json({ error: err.message }); // Send the error message in the response
+                })
+                
+            }
             res.status(200).json(newConv)
         })
         .catch(err => {
-            res.status(500).json({error: err})
+            console.error(err);
+            res.status(500).json({ error: err.message }); // Send the error message in the response
         })
+        
     }
 }
 
