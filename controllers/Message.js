@@ -1,6 +1,7 @@
 import Message from '../models/Message.js'
 import Signalement from '../models/Signalement.js';
 import BannedWords from "../models/BannedWords.js"
+// import Car from "../models/car.js"
 import Conversation from "../models/Conversation.js"
 import { validationResult } from "express-validator"
 
@@ -18,6 +19,7 @@ if (!apiKey) {
 
 const openai = new OpenAI({ apiKey: apiKey });
 
+const chatBotId = "657b52068948af22d02152e1";
 // Fin OpenAI API Config ****************************************
 
 //Créer un message
@@ -244,81 +246,79 @@ export function ListSignalements(req, res) {
     })
 }
 
-    //le chatbot de openai  
-    export async function sendMessageToChatBot(req, res) {
-        try {
-              //get chat history of conv
-              const  {userMessage, convId} = req.body;
+//le chatbot de openai  
+export async function sendMessageToChatBot(req, res) {
+  try {
+        //get chat history of conv
+        const  {userMessage, convId} = req.body;
+        //getPreviousMessages
+        const messagesHisto = await Message.find({ conversationId: convId });
+        console.log(messagesHisto);
 
-              //getPreviousMessages
-              Message
-              .find({
-                conversationId: convId,
-              }).then(async messagesHisto => {
-                //get cars
-                carList = []
-                Car.find({})
-                .then((docs) => {
-                  carList = docs
-                })
-                .catch((err) => {
-                  res.status(500).json({ error: err });
-                });
-                //get agences
-                agenceList = []
-                Agence.find({})
-                .then((agences) => {
-                  agenceList = agences
-                })
-                .catch((err) => {
-                  res.status(500).json({ error: err });
-                });
-                //make it possible to rent a car
+        // Get cars
+        let carList = ""//await Car.find({});
+        console.log(carList);
 
-                const systemMessage = 'You are CarRentalBot, a knowledgeable assistant from LocaGest Car' 
-                +'Rentals. Provide helpful information and assistance to our customers. Respond in the' 
-                +'language of the user.(here is the list of the cars of our agency, if needed to give to the user :'
-                +'-DEBUTCARSLIST- '+carList+' -FINCARSLIST-, here is the list of our agencies : -DEBUTAGENCIESLIST- '
-                +agenceList+' -FINAGENCIESLIST-, and here is the historic of the messages between you and the user if exist : '
-                +'-DEBUTLISTMESSAGESIFEXIST- '+messages+' -FINLISTMESSAGESIFEXIST-';
-        
-                // Construct messages array with system role and user role
-                const messages = [
-                  { role: 'system', content: systemMessage },
-                  { role: 'user', content: userMessage },
-                ];
+        // Get agences
+        let agenceList ="" //await Agence.find({});
+        console.log(agenceList);
 
-                console.log(messages)
-        
-                // Add historical messages to the chat
-                // if (idConv) {
-                //   messages.push(...idConv.map((message) => ({ role: 'assistant', content: message })));
-                // }
-        
-                // Make the API call to OpenAI
-                const completion = await openai.chat.completions.create({
-                  messages: messages,
-                  model: 'gpt-3.5-turbo',
-                });
-        
-                // Extract the assistant's reply
-                const assistantReply = completion.choices[0].message.content;
-        
-                // You can save the assistantReply to your database or perform any other necessary actions
-        
-                // Send the response back to the client
-                res.json({ assistantReply });
+          //make it possible to rent a car
 
-              })
-              .catch(err => {
-                res.status(500).json({error: err})
-              })
+          const systemMessage = 'You are CarRentalBot, a knowledgeable assistant from LocaGest Car' 
+          +'Rentals. Provide helpful information and assistance to our customers. Respond in the' 
+          +'language of the user.(here is the list of the cars of our agency, if needed to give to the user :'
+          +'-DEBUTCARSLIST- '+carList+' -FINCARSLIST-, here is the list of our agencies : -DEBUTAGENCIESLIST- '
+          +agenceList+' -FINAGENCIESLIST-, and here is the historic of the messages between you and the user if exist : '
+          +'-DEBUTLISTMESSAGESIFEXIST- '+messagesHisto+' -FINLISTMESSAGESIFEXIST-)(IMPORTANT : répondre avec 170 caractères max;, grand max!!)(ne pas afficher les id ou les caractères spéciaux à l utilisateur comme // et autre, luis parler comme une simplepersonne))';
+  
+          // Construct messages array with system role and user role
+          const messages = [
+            { role: 'system', content: systemMessage },
+            { role: 'user', content: userMessage },
+          ];
 
-            } catch (error) {
-              console.error('Error sending message to chatbot:', error.message);
-              res.status(500).json({ error: 'Internal Server Error' });
-            }
-    }
+          console.log(messages)
+  
+          // Add historical messages to the chat
+          // if (idConv) {
+          //   messages.push(...idConv.map((message) => ({ role: 'assistant', content: message })));
+          // }
+  
+          // Make the API call to OpenAI
+          const completion = await openai.chat.completions.create({
+            messages: messages,
+            model: 'gpt-3.5-turbo',
+          });
+  
+          // Extract the assistant's reply
+          const assistantReply = completion.choices[0].message.content;
+  
+          // Send the response back to the client
+          var responseMessageToAdd
+          try {
+            responseMessageToAdd = {
+              conversationId: convId,
+              sender: chatBotId,
+              text: assistantReply,
+            };
+          } catch (error) {
+            console.error("Error creating responseMessageToAdd:", error);
+          }
+          Message.create(responseMessageToAdd)
+          .then((newMessage) => {
+          })
+          .catch((err) => {
+            console.error(err);
+            res.status(500).json({ error: err });
+          });
+          res.json({ assistantReply });
+
+      } catch (error) {
+        console.error('Error sending message to chatbot:', error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+}
 
 
 
