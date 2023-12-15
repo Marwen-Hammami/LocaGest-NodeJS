@@ -1,5 +1,57 @@
 // Import the Reservation model
 import Reservation from '../models/reservation.js';
+// import sendEmailWithAttachment from "../utils/Mailer.js";
+
+
+const generateAndSendQRCode = async (req, res) => {
+    try {
+      const email = req.body.email;
+   
+  
+      
+  
+      const subject = "Thank You for Your Payment";
+      const text = `Hello Thank you for your payment. Please find the QR code attached.\n\nBest regards,\nYour Company`;
+  
+  
+      res.status(200).json({ message: "Payment notification has been sent to your email" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+export async function sendMail(req, res) {
+    const email = req.body.email;
+   
+  
+    const subject = "Thank You for Your Payment";
+    const text = `Hello Thank you for your payment. Please find the QR code attached.\n\nBest regards,\nYour Company`;
+
+    try {
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASSWORD
+          }
+        });
+    
+        const info = await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject,
+          text,
+          //attachments: [{ filename: 'qr_code.png', content: attachment }]
+        });
+    
+        console.log(`Message sent: ${info.messageId}`);
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+
+  }
 
 // Create a new reservation
 export async function createReservation(req, res) {
@@ -59,6 +111,11 @@ export async function updateReservation(req, res) {
     }
 }
 
+
+
+
+
+
 // Delete a reservation
 export async function deleteReservation(req, res) {
     const reservationId = req.params.id;
@@ -103,3 +160,9 @@ export async function markReservationAsPaid(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
+ 
+
+
+export default {
+    generateAndSendQRCode
+};
