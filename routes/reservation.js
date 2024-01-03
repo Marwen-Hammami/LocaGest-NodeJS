@@ -1,6 +1,11 @@
 // Import express
 import { Router } from 'express';
 import {Stripe} from 'stripe';
+// Importez le contrôleur modifié avec la nouvelle fonction
+import { processPaymentAndSendInvoice } from '../controllers/reservation.js';
+
+
+
 
 
 // Import the Reservation controller
@@ -31,6 +36,8 @@ router.delete('/:id', deleteReservation);
 // Define the routes for the Reservation model
 router.put('/updateStatut/:id', markReservationAsPaid);
 
+// Ajoutez une nouvelle route pour le traitement du paiement et l'envoi de la facture
+router.post('/process-payment-and-send-invoice', processPaymentAndSendInvoice);
 
 router.post('/create-intent', async (req, res) => {
   try {
