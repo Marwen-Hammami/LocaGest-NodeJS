@@ -20,6 +20,7 @@ import Historique from './routes/historique.js';
 import Distribution from './routes/distribution.js';
 import Tools from './routes/tools.js';
 import socketController from './socket/socketController.js';
+import historiqueEntretienRoutes from './routes/historique_entretien.js'
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -66,6 +67,7 @@ app.use('/agence', Agence)
 app.use('/res',Reservation); //m3aha hethy
 app.use('/histo',Historique);
 app.use('/car', car)
+app.use('/historique_entretien', historiqueEntretienRoutes);
 app.use('/User', user);
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
