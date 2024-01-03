@@ -206,80 +206,6 @@ export function createUserAdmin(req, res) {
 
 
 
-
-
-
-
-/*
-export function createUser(req, res) {
-    const { username, email, password, firstName, lastName, rate, specialization, experience, roles } = req.body;
-
-    // Validate input data (e.g., check if required fields are present)
-    if (!username || !email || !password) {
-        return res.status(400).json({ error: 'Username, email, and password are required fields.' });
-    }
-
-    // Validate email format
-    if (!validator.isEmail(email)) {
-        return res.status(400).json({ error: 'Invalid email format.' });
-    }
-
-    // Validate the roles against a list of allowed roles
-    const allowedroles = ['admin', 'technician', 'client'];
-    if (!allowedroles.includes(roles)) {
-        return res.status(400).json({ error: 'Invalid roles provided.' });
-    }
-
-    // Hash the password before saving it
-    const hashedPassword = bcrypt.hashSync(password, saltRounds);
-
-    // Generate an OTP (One-Time Password)
-    const otpCode = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-
-    // Set the expiration time for the OTP
-    const otpExpiration = Date.now() + OTP_EXPIRATION_TIME;
-
-    // Create a new user instance with OTP details
-    const newUser = new User({
-        username,
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        rate,
-        specialization,
-        experience,
-        roles,
-        otpCode,
-        otpExpiration,
-        isVerified: false, // Add a field to track email verification status
-    });
-
-    // Save the user to the database
-    newUser.save()
-        .then(savedUser => {
-            // Send an email with the verification link
-            const verificationLink = `http://localhost:9090/User/verify-email?email=${encodeURIComponent(savedUser.email)}&otp=${encodeURIComponent(otpCode)}`;
-
-            const mailOptions = {
-                from: 'maher.karoui@esprit.tn', // replace with your email
-                to: savedUser.email,
-                subject: 'Account Verification',
-                text: `Thank you for creating an account. Please click on the following link to verify your email:\n\n${verificationLink}`,
-            };
-
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    return res.status(500).json({ error: error.message });
-                }
-                res.status(201).json(savedUser);
-            });
-        })
-        .catch(error => {
-            res.status(500).json({ error: error.message });
-        });
-}*/
-
 export async function updateUserUsername(req, res) {
     try {
         const userId = req.params.id;
@@ -355,22 +281,26 @@ export async function updateUserPassword(req, res) {
     }
 }
 export async function banUser(req, res) {
-    try {
-      const userId = req.params.id;
-      
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-  
-      user.isBanned = true;
-      const bannedUser = await user.save();
-  
-      res.status(200).json(bannedUser);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+  try {
+    const userId = req.params.id;
+    const banMessage = req.body.banMessage; // Retrieve ban message from request body
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
+
+      user.isBanned = true;
+      user.msgBan = banMessage; // Set the ban message from the request body
+      user.rate = "AVERAGE"; // Set user's rate to "AVERAGE"
+      const bannedUser = await user.save();
+
+      res.status(200).json(bannedUser);
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+}
   
   // Unban a user
   export async function unbanUser(req, res) {
@@ -383,6 +313,8 @@ export async function banUser(req, res) {
       }
   
       user.isBanned = false;
+      user.isArchived = false;
+      
       const unbannedUser = await user.save();
   
       res.status(200).json(unbannedUser);
@@ -395,22 +327,95 @@ export async function banUser(req, res) {
   export async function banUserWithDuration(req, res) {
     try {
       const userId = req.params.id;
-      const { duration } = req.body;
-      
+      const { duration, banMessage } = req.body; // Add banMessage destructuring
+  
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
   
+      const banExpiration = moment().add(duration, 'days');
       user.isBanned = true;
-      user.banExpiration = moment().add(duration, 'minutes');
+      user.banExpiration = banExpiration;
+      user.msgBan = banMessage; // Set the ban message
+  
       const bannedUser = await user.save();
+  
+      // Schedule a task to reset isBanned when the ban duration expires
+      scheduleResetBanStatus(userId, banExpiration);
+  
+      // Check if the ban duration is more than 3 days
+      const banDurationInDays = moment.duration(banExpiration.diff(moment())).asDays();
+      if (banDurationInDays > 3) {
+        user.rate = "BAD"; // Update user's rate to "BAD"
+        await user.save();
+      }
   
       res.status(200).json(bannedUser);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   }
+  // Schedule task to reset isBanned when the ban duration expires
+  function scheduleResetBanStatus(userId, banExpiration) {
+    const now = moment();
+    const duration = moment.duration(banExpiration.diff(now));
+    const durationMilliseconds = duration.asMilliseconds();
+  
+    setTimeout(async () => {
+      try {
+        const user = await User.findById(userId);
+        if (user && user.isBanned) {
+          user.isBanned = false;
+          await user.save();
+        }
+      } catch (error) {
+        console.error('Error occurred while resetting ban status:', error);
+      }
+    }, durationMilliseconds);
+  }
+
+  export async function calculateStatistics(req, res) {
+    try {
+      const users = await User.find();
+      const totalUsers = users.length;
+      let badCount = 0;
+      let averageCount = 0;
+      let goodCount = 0;
+  
+      for (const user of users) {
+        const { rate } = user;
+        if (rate === 'BAD') {
+          badCount++;
+        } else if (rate === 'AVERAGE') {
+          averageCount++;
+        } else if (rate === 'GOOD') {
+          goodCount++;
+        }
+      }
+  
+      const badPercentage = (badCount / totalUsers) * 100;
+      const averagePercentage = (averageCount / totalUsers) * 100;
+      const goodPercentage = (goodCount / totalUsers) * 100;
+  
+      const statistics = {
+        totalUsers,
+        badCount,
+        averageCount,
+        goodCount,
+        badPercentage,
+        averagePercentage,
+        goodPercentage,
+      };
+  
+      // Send the statistics as a JSON response
+      res.json(statistics);
+    } catch (error) {
+      console.error('Error occurred while calculating statistics:', error);
+      res.status(500).json({ error: 'An error occurred while calculating statistics' });
+    }
+  }
+  
 
 // Get a user by ID
 export function GetUser(req, res) {
@@ -434,6 +439,22 @@ export function getAllUsers(req, res) {
     User.find()
         .then(users => {
             res.status(200).json(users);
+        })
+        .catch(error => {
+            res.status(500).json({ error: error.message });
+        });
+}
+export function getAllUsersFlutter(req, res) {
+    User.find()
+        .then(users => {
+            // Map the users to include only the necessary information, such as id, email, and roles
+            const usersWithId = users.map(user => ({
+                id: user._id,
+                email: user.email,
+                roles: user.roles,
+            }));
+
+            res.status(200).json(usersWithId);
         })
         .catch(error => {
             res.status(500).json({ error: error.message });
@@ -463,43 +484,43 @@ export function updateUser(req, res) {
         });
 }
 
-export async function updateRoleByUsername(username, newRole) {
+export async function updateRoleById(req, res) {
     try {
-      const user = await User.findOne({ username });
+      const userId = req.params.id;
+      const newRole = req.body.newRole;
+      const newRate = req.body.newRate;
+  
+      const user = await User.findById(userId);
   
       if (!user) {
         // User not found
-        return { success: false, message: 'User not found' };
+        return res.status(404).json({ success: false, message: 'User not found' });
       }
   
-      // Update the role
+      // Validate the newRole
+      const validRoles = ['technician', 'client', 'admin'];
+      if (!validRoles.includes(newRole)) {
+        return res.status(400).json({ success: false, message: 'Invalid role. Please choose from technician, client, or admin.' });
+      }
+  
+      // Validate the newRate
+      const validRates = ['GOOD', 'BAD', 'AVERAGE'];
+      if (!validRates.includes(newRate)) {
+        return res.status(400).json({ success: false, message: 'Invalid rate. Please choose from GOOD, BAD, or AVERAGE.' });
+      }
+  
+      // Update the role and rate
       user.roles = newRole;
+      user.rate = newRate;
       await user.save();
   
-      return { success: true, message: 'Role updated successfully' };
+      return res.status(200).json({ success: true, message: 'Role and rate updated successfully' });
     } catch (error) {
-      return { success: false, message: error.message };
+      return res.status(500).json({ success: false, message: error.message });
     }
   }
 
-  export async function updateRoleByEmail(email, newRole) {
-    try {
-      const user = await User.findOne({ email });
   
-      if (!user) {
-        // User not found
-        return { success: false, message: 'User not found' };
-      }
-  
-      // Update the role
-      user.roles = newRole; // Assuming newRole is a valid role value ('technicien', 'admin', or 'client')
-      await user.save();
-  
-      return { success: true, message: 'Role updated successfully' };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  }
 
 
 
@@ -519,49 +540,72 @@ export function deleteUser(req, res) {
 
 // Sign in a user
 export function signInUser(req, res) {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    // Validate input data
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required fields.' });
-    }
+  // Validate input data
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required fields.' });
+  }
 
-    // Sanitize the email input
-    const sanitizedEmail = validator.escape(email);
+  // Sanitize the email input
+  const sanitizedEmail = validator.escape(email);
 
-    // Find the user by email
-    User.findOne({ email: sanitizedEmail })
-        .then(user => {
-            if (!user) {
-                return res.status(400).json({ error: 'Invalid email or password.' });
-            }
+  // Find the user by email
+  User.findOne({ email: sanitizedEmail })
+    .then(user => {
+      if (!user) {
+        return res.status(400).json({ error: 'Invalid email or password.' });
+      }
 
-            // Compare the provided password with the stored hashed password
-            bcrypt.compare(password, user.password)
-                .then((result) => {
-                    if (result) {
-                        // If they match, return only necessary data
-                        const userData = {
-                            id: user.id,
-                            email: user.email
-                        };
-                        const token = jwt.sign(userData, secretKey);
+      // Check if the user is banned
+      if (user.isBanned === true) {
+        const response = {
+          error: 'Access denied. User is banned.'
+        };
 
-                        res.status(200).json({ userData, token });
-                    } else {
-                        res.status(400).json({ error: 'Invalid email or password.' });
-                    }
-                })
-                .catch((error) => {
-                    res.status(500).json({ error: error.message });
-                });
+        if (user.msgBan) {
+          response.msgBan = user.msgBan;
+        }
+
+        return res.status(403).json(response);
+      }
+
+      if (user.isArchived === true) {
+        const response = {
+          error: 'Access denied. User is deleted.'
+        };
+        return res.status(403).json(response);
+      }
+
+      // Compare the provided password with the stored hashed password
+      bcrypt.compare(password, user.password)
+        .then((result) => {
+          if (result) {
+            // If they match, return only necessary data
+            const userData = {
+              success: true,
+              user: {
+                id: user.id,
+                email: user.email
+              },
+              token: jwt.sign({ id: user.id }, secretKey)
+            };
+
+            res.status(200).json(userData);
+          } else {
+            res.status(400).json({ error: 'Invalid email or password.' });
+          }
         })
-        .catch(error => {
-            res.status(500).json({ error: error.message });
+        .catch((error) => {
+          res.status(500).json({ error: error.message });
         });
-}
+    })
+    .catch(error => {
+      res.status(500).json({ error: error.message });
+    });
+  }
 
-export function signInUserAdmin(req, res) {
+  export function signInUserAdmin(req, res) {
     const { email, password } = req.body;
   
     // Validate input data
@@ -578,6 +622,25 @@ export function signInUserAdmin(req, res) {
         if (!user) {
           return res.status(400).json({ error: 'Invalid email or password.' });
         }
+  
+        // Check if the user is banned
+        if (user.isBanned === true) {
+          const response = {
+            error: 'Access denied. User is banned.'
+          };
+  
+          if (user.msgBan) {
+            response.msgBan = user.msgBan;
+          }
+  
+          return res.status(403).json(response);
+        }
+        if (user.isArchived === true) {
+            const response = {
+              error: 'Access denied. User is deleted.'
+            };
+            return res.status(403).json(response);
+          }
   
         // Compare the provided password with the stored hashed password
         bcrypt.compare(password, user.password)
@@ -608,6 +671,7 @@ export function signInUserAdmin(req, res) {
         res.status(500).json({ error: error.message });
       });
   }
+
 
 const accountSid = 'ACf91e1b74b1c8896aa6888016ab2aa3ee';
 const authToken = '85479a5ad6341e434caf2e8ec9fa35e2';
@@ -661,9 +725,26 @@ export function forgotPasswordSMS(req, res) {
 }
 
 
+export async function archiveUser(req, res) {
+    try {
+        const userId = req.params.id;
+        
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+    
+        user.isArchived = true;
+        const archived = await user.save();
+    
+        res.status(200).json(archived);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+  }
 
-
-
+        
+  
 
 export function forgotPassword(req, res) {
     const { email } = req.body;

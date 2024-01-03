@@ -46,6 +46,14 @@ const userSchema = new Schema({
     type:String,
      default: null
   },
+  msgBan : {
+     type:String,
+     default: null
+  },
+  isArchived : {
+    type:Boolean,
+     default: false
+  },
   experience: {
     type: Number,
     default: null
