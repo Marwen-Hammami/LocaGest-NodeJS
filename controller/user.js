@@ -4,9 +4,8 @@ import bcrypt from 'bcrypt';
 import transporter from '../emailConfig.js';
 import otpGenerator from 'otp-generator';
 import jwt from 'jsonwebtoken';
+
 import twilio from 'twilio';
-import { FileUpload } from '../middlewares/multer-config.js';
-import moment from 'moment';
 
 
 
@@ -14,204 +13,9 @@ const saltRounds = 10;
 const secretKey = '756d47db75d3e5fdd75aed04700046c52f0d6125ac8ba18eba1b4c3c3552aadf';
 const OTP_EXPIRATION_TIME = 10 * 60 * 1000; // 10 minutes in milliseconds
 
-// Create user route with Multer middleware for image upload
-export function createUser(req, res) {
-    // Use Multer middleware to handle image upload
-    FileUpload(req, res, function (err) {
-                if (err) {
-            console.error('Error uploading image:', err);
-            return res.status(500).json({ error: 'Error uploading image.' });
-        }
 
-        const {
-            username,
-            email,
-            password,
-            firstName,
-            lastName,
-            rate,
-            specialization,
-            experience,
-            roles,
-            phoneNumber,
-            creditCardNumber,
-        } = req.body;
-
-        // Validate input data
-        if (!username || !email || !password) {
-            return res.status(400).json({ error: 'Username, email, and password are required fields.' });
-        }
-
-        // Validate email format
-        if (!validator.isEmail(email)) {
-            return res.status(400).json({ error: 'Invalid email format.' });
-        }
-
-        // Validate the roles against a list of allowed roles
-        const allowedRoles = ['admin', 'technician', 'client'];
-        if (!allowedRoles.includes(roles)) {
-            return res.status(400).json({ error: 'Invalid roles provided.' });
-        }
-
-        // Hash the password
-        const hashedPassword = bcrypt.hashSync(password, saltRounds);
-
-        // Generate OTP
-        const otpCode = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-
-        // Set the expiration time for OTP
-        const otpExpiration = Date.now() + OTP_EXPIRATION_TIME;
-
-        // Extract image filename from Multer
-        const image = req.file ? req.file.filename : null;
-
-        // Create a new user instance
-        const newUser = new User({
-            username,
-            email,
-            password: hashedPassword,
-            firstName,
-            lastName,
-            rate,
-            specialization,
-            experience,
-            roles,
-            phoneNumber,
-            creditCardNumber,
-            image,
-            otpCode,
-            otpExpiration,
-            isVerified: false,
-        });
-
-        // Save the user to the database
-        newUser.save()
-            .then(savedUser => {
-                const verificationLink = `http://localhost:9090/User/verify-email?email=${encodeURIComponent(savedUser.email)}&otp=${encodeURIComponent(otpCode)}`;
-
-                const mailOptions = {
-                    from: 'maher.karoui@esprit.tn',
-                    to: savedUser.email,
-                    subject: 'Account Verification',
-                    text: `Thank you for creating an account. Please click on the following link to verify your email:\n\n${verificationLink}`,
-                };
-
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        return res.status(500).json({ error: error.message });
-                    }
-                    res.status(201).json(savedUser);
-                });
-            })
-            .catch(error => {
-                res.status(500).json({ error: error.message });
-            });
-    });
-}
-
-export function createUserAdmin(req, res) {
-    // Use Multer middleware to handle image upload
-    FileUpload(req, res, function (err) {
-        if (err) {
-            console.error('Error uploading image:', err);
-            return res.status(500).json({ error: 'Error uploading image.' });
-        }
-
-        const {
-            username,
-            email,
-            password,
-            firstName,
-            lastName,
-            rate,
-            specialization,
-            experience,
-            roles,
-            phoneNumber,
-            creditCardNumber,
-        } = req.body;
-
-        // Validate input data
-        if (!username || !email || !password) {
-            return res.status(400).json({ error: 'Username, email, and password are required fields.' });
-        }
-
-        // Validate email format
-        if (!validator.isEmail(email)) {
-            return res.status(400).json({ error: 'Invalid email format.' });
-        }
-
-        // Validate the roles against a list of allowed roles
-        const allowedRoles = ['admin', 'technician', 'client'];
-        if (!allowedRoles.includes(roles)) {
-            return res.status(400).json({ error: 'Invalid roles provided.' });
-        }
-
-        // Hash the password
-        const hashedPassword = bcrypt.hashSync(password, saltRounds);
-
-        // Generate OTP
-        const otpCode = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-
-        // Set the expiration time for OTP
-        const otpExpiration = Date.now() + OTP_EXPIRATION_TIME;
-
-        // Extract image filename from Multer
-        const image = req.file ? req.file.filename : null;
-
-        // Create a new user instance
-        const newUser = new User({
-            username,
-            email,
-            password: hashedPassword,
-            firstName,
-            lastName,
-            rate,
-            specialization,
-            experience,
-            roles:'admin', // Set the default role as "admin"
-            phoneNumber,
-            creditCardNumber,
-            image,
-            otpCode,
-            otpExpiration,
-            isVerified: false,
-        });
-
-        // Save the user to the database
-        newUser.save()
-            .then(savedUser => {
-                const verificationLink = `http://localhost:9090/User/verify-email?email=${encodeURIComponent(savedUser.email)}&otp=${encodeURIComponent(otpCode)}`;
-
-                const mailOptions = {
-                    from: 'maher.karoui@esprit.tn',
-                    to: savedUser.email,
-                    subject: 'Account Verification',
-                    text: `Thank you for creating an account. Please click on the following link to verify your email:\n\n${verificationLink}`,
-                };
-
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        return res.status(500).json({ error: error.message });
-                    }
-                    res.status(201).json(savedUser);
-                });
-            })
-            .catch(error => {
-                res.status(500).json({ error: error.message });
-            });
-    });
-}
-
-
-
-
-
-
-
-
-/*
-export function createUser(req, res) {
+// Create a new user
+/*export function createUser(req, res) {
     const { username, email, password, firstName, lastName, rate, specialization, experience, roles } = req.body;
 
     // Validate input data (e.g., check if required fields are present)
@@ -278,156 +82,93 @@ export function createUser(req, res) {
         .catch(error => {
             res.status(500).json({ error: error.message });
         });
-}*/
-
-export async function updateUserUsername(req, res) {
-    try {
-        const userId = req.params.id;
-        const { username } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        user.username = username;
-        const updatedUser = await user.save();
-
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
 }
-export async function updateUserPhone(req, res) {
-    try {
-        const userId = req.params.id;
-        const { phoneNumber } = req.body;
+*/
+export function createUser(req, res) {
+    const { 
+        username, 
+        email, 
+        password, 
+        firstName, 
+        lastName, 
+        rate, 
+        specialization, 
+        experience, 
+        roles,
+        phoneNumber,
+        creditCardNumber,
+        image
+    } = req.body;
 
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        user.phoneNumber = phoneNumber;
-        const updatedUser = await user.save();
-
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    // Validate input data (e.g., check if required fields are present)
+    if (!username || !email || !password) {
+        return res.status(400).json({ error: 'Username, email, and password are required fields.' });
     }
+
+    // Validate email format
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ error: 'Invalid email format.' });
+    }
+
+    // Validate the roles against a list of allowed roles
+    const allowedRoles = ['admin', 'technician', 'client'];
+    if (!allowedRoles.includes(roles)) {
+        return res.status(400).json({ error: 'Invalid roles provided.' });
+    }
+
+    // Hash the password before saving it
+    const hashedPassword = bcrypt.hashSync(password, saltRounds);
+
+    // Generate an OTP (One-Time Password)
+    const otpCode = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+
+    // Set the expiration time for the OTP
+    const otpExpiration = Date.now() + OTP_EXPIRATION_TIME;
+
+    // Create a new user instance with OTP details, phoneNumber, creditCardNumber, and image
+    const newUser = new User({
+        username,
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        rate,
+        specialization,
+        experience,
+        roles,
+        phoneNumber,
+        creditCardNumber,
+        image,
+        otpCode,
+        otpExpiration,
+        isVerified: false, // Add a field to track email verification status
+    });
+
+    // Save the user to the database
+    newUser.save()
+        .then(savedUser => {
+            // Send an email with the verification link
+            const verificationLink = `http://localhost:9090/User/verify-email?email=${encodeURIComponent(savedUser.email)}&otp=${encodeURIComponent(otpCode)}`;
+
+            const mailOptions = {
+                from: 'maher.karoui@esprit.tn', // replace with your email
+                to: savedUser.email,
+                subject: 'Account Verification',
+                text: `Thank you for creating an account. Please click on the following link to verify your email:\n\n${verificationLink}`,
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.status(500).json({ error: error.message });
+                }
+                res.status(201).json(savedUser);
+            });
+        })
+        .catch(error => {
+            res.status(500).json({ error: error.message });
+        });
 }
 
-export async function updateUserEmail(req, res) {
-    try {
-        const userId = req.params.id;
-        const { email } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        user.email = email;
-        const updatedUser = await user.save();
-
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
-
-export async function updateUserPassword(req, res) {
-    try {
-        const userId = req.params.id;
-        const { password } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        user.password = bcrypt.hashSync(password, saltRounds);
-        const updatedUser = await user.save();
-
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
-export async function banUser(req, res) {
-    try {
-      const userId = req.params.id;
-      
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-  
-      user.isBanned = true;
-      const bannedUser = await user.save();
-  
-      res.status(200).json(bannedUser);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-  
-  // Unban a user
-  export async function unbanUser(req, res) {
-    try {
-      const userId = req.params.id;
-      
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-  
-      user.isBanned = false;
-      const unbannedUser = await user.save();
-  
-      res.status(200).json(unbannedUser);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-  
-  // Ban a user with duration
-  export async function banUserWithDuration(req, res) {
-    try {
-      const userId = req.params.id;
-      const { duration } = req.body;
-      
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-  
-      user.isBanned = true;
-      user.banExpiration = moment().add(duration, 'minutes');
-      const bannedUser = await user.save();
-  
-      res.status(200).json(bannedUser);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-// Get a user by ID
-export function GetUser(req, res) {
-    const userId = req.params.id;
-  
-    User.findById(userId)
-      .then(user => {
-        if (!user) {
-          res.status(404).json({ message: 'User not found' });
-          return;
-        }
-        res.status(200).json(user);
-      })
-      .catch(error => {
-        res.status(500).json({ error: error.message });
-      });
-  }
 
 // Retrieve all users
 export function getAllUsers(req, res) {
@@ -443,17 +184,17 @@ export function getAllUsers(req, res) {
 // Update a user
 export function updateUser(req, res) {
     const userId = req.params.id;
-    const { username, email, password, firstName, lastName, creditCardNumber } = req.body;
+    const { username, firstName, lastName, creditCardNumber, rate, specialization, experience, roles } = req.body;
 
     User.findByIdAndUpdate(userId, {
         username,
-        email,
-        password,
         firstName,
         lastName,
-        phoneNumber,
         creditCardNumber,
-       
+        rate,
+        specialization,
+        experience,
+        roles,
     }, { new: true }) // Return the updated user
         .then(updatedUser => {
             res.status(200).json(updatedUser);
@@ -462,46 +203,6 @@ export function updateUser(req, res) {
             res.status(500).json({ error: error.message });
         });
 }
-
-export async function updateRoleByUsername(username, newRole) {
-    try {
-      const user = await User.findOne({ username });
-  
-      if (!user) {
-        // User not found
-        return { success: false, message: 'User not found' };
-      }
-  
-      // Update the role
-      user.roles = newRole;
-      await user.save();
-  
-      return { success: true, message: 'Role updated successfully' };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  }
-
-  export async function updateRoleByEmail(email, newRole) {
-    try {
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        // User not found
-        return { success: false, message: 'User not found' };
-      }
-  
-      // Update the role
-      user.roles = newRole; // Assuming newRole is a valid role value ('technicien', 'admin', or 'client')
-      await user.save();
-  
-      return { success: true, message: 'Role updated successfully' };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  }
-
-
 
 // Delete a user
 export function deleteUser(req, res) {
@@ -518,99 +219,53 @@ export function deleteUser(req, res) {
 }
 
 // Sign in a user
-export function signInUser(req, res) {
-    const { email, password } = req.body;
+export async function signInUser(req, res) {
+    try {
+        const { email, password } = req.body;
 
-    // Validate input data
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required fields.' });
+        // Validate input data
+        if (!email || !password) {
+            return res.status(400).json({ success: false, error: 'Email and password are required fields.' });
+        }
+
+        // Sanitize the email input
+        const sanitizedEmail = validator.escape(email);
+
+        // Find the user by email
+        const user = await User.findOne({ email: sanitizedEmail });
+
+        if (!user) {
+            return res.status(400).json({ success: false, error: 'Invalid email or password.' });
+        }
+
+        // Compare the provided password with the stored hashed password
+        const result = await bcrypt.compare(password, user.password);
+
+        if (result) {
+            // If they match, generate a token
+            const userData = {
+                _id: user.id,
+                username: user.username,
+                email: user.email,
+                namel: user.lastName
+                // Include other necessary fields like firstName, lastName, etc.
+            };
+
+            const token = jwt.sign({ user: user }, secretKey, { expiresIn: '1h' });
+
+            // Send the response
+            return res.status(200).json({ success: true, user: userData, token });
+        }
+
+        return res.status(400).json({ success: false, error: 'Invalid email or password.' });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
     }
-
-    // Sanitize the email input
-    const sanitizedEmail = validator.escape(email);
-
-    // Find the user by email
-    User.findOne({ email: sanitizedEmail })
-        .then(user => {
-            if (!user) {
-                return res.status(400).json({ error: 'Invalid email or password.' });
-            }
-
-            // Compare the provided password with the stored hashed password
-            bcrypt.compare(password, user.password)
-                .then((result) => {
-                    if (result) {
-                        // If they match, return only necessary data
-                        const userData = {
-                            id: user.id,
-                            email: user.email
-                        };
-                        const token = jwt.sign(userData, secretKey);
-
-                        res.status(200).json({ userData, token });
-                    } else {
-                        res.status(400).json({ error: 'Invalid email or password.' });
-                    }
-                })
-                .catch((error) => {
-                    res.status(500).json({ error: error.message });
-                });
-        })
-        .catch(error => {
-            res.status(500).json({ error: error.message });
-        });
 }
 
-export function signInUserAdmin(req, res) {
-    const { email, password } = req.body;
-  
-    // Validate input data
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required fields.' });
-    }
-  
-    // Sanitize the email input
-    const sanitizedEmail = validator.escape(email);
-  
-    // Find the user by email
-    User.findOne({ email: sanitizedEmail })
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({ error: 'Invalid email or password.' });
-        }
-  
-        // Compare the provided password with the stored hashed password
-        bcrypt.compare(password, user.password)
-          .then((result) => {
-            if (result) {
-              // Check if the user has the 'admin' role
-              if (user.roles === 'admin') {
-                // If they match and the user has the 'admin' role, return only necessary data
-                const userData = {
-                  id: user.id,
-                  email: user.email
-                };
-                const token = jwt.sign(userData, secretKey);
-  
-                res.status(200).json({ userData, token });
-              } else {
-                res.status(403).json({ error: 'Access denied. Only users with the admin role can sign in.' });
-              }
-            } else {
-              res.status(400).json({ error: 'Invalid email or password.' });
-            }
-          })
-          .catch((error) => {
-            res.status(500).json({ error: error.message });
-          });
-      })
-      .catch(error => {
-        res.status(500).json({ error: error.message });
-      });
-  }
 
 const accountSid = 'ACf91e1b74b1c8896aa6888016ab2aa3ee';
-const authToken = '85479a5ad6341e434caf2e8ec9fa35e2';
+const authToken = '4298c71c8a3c7534e758939176d3cd2d';
 const twilioPhoneNumber = '+12512209884';
 const client = twilio(accountSid, authToken);
 
@@ -712,76 +367,7 @@ export function forgotPassword(req, res) {
     });
 }
 
-export async function verifyOTP(req, res) {
-    const { email, otpCode } = req.body;
-  
-    try {
-      // Find the user by email
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        return res.status(400).json({ error: 'User not found.' });
-      }
-  
-      console.log('Provided OTP Code:', otpCode);
-      console.log('Stored OTP Code:', user.otpCode);
-      console.log('OTP Expiration:', user.otpExpiration);
-  
-      // Check if OTP code and expiration exist
-      if (!user.otpCode || !user.otpExpiration) {
-        console.log('OTP data missing.');
-        return res.status(400).json({ error: 'Invalid or expired OTP code.' });
-      }
-  
-      // Validate the OTP
-      const isOTPValid = user.otpCode === otpCode && user.otpExpiration >= Date.now();
-      console.log('Is OTP Valid?', isOTPValid);
-  
-      res.status(200).json({ isOTPValid });
-    } catch (error) {
-      console.log('Error verifying OTP:', error.message);
-      res.status(500).json({ error: error.message });
-    }
-  }
-  export async function newPassword(req, res) {
-    const { email, password, confirmPassword } = req.body;
-  
-    try {
-      // Find the user by email
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        return res.status(400).json({ error: 'User not found.' });
-      }
-  
-      // Check if password and confirm password match
-      if (password !== confirmPassword) {
-        return res.status(400).json({ error: 'Password and confirm password do not match.' });
-      }
-  
-      // Update the user's password
-      user.password = bcrypt.hashSync(password, saltRounds);
-      user.otpCode = undefined;
-      user.otpExpiration = undefined;
 
-      await user.save();
-  
-      res.status(200).json({ message: 'Password updated successfully.' });
-    } catch (error) {
-      console.log('Error updating password:', error.message);
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  export async function getUserCount() {
-    try {
-      const count = await User.countDocuments();
-      return count;
-    } catch (error) {
-      console.error('Failed to get user count:', error);
-      throw error;
-    }
-  }
 
 export async function resetPassword(req, res) {
     const { email, otpCode, newPassword } = req.body;

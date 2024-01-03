@@ -1,4 +1,3 @@
-
 import { Schema, model } from 'mongoose';
 
 const userSchema = new Schema({
@@ -11,22 +10,16 @@ const userSchema = new Schema({
     required: true,
     match: /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/
   },
-  
   password: {
     type: String,
     required: true,
   },
-  
   firstName: {
     type: String,
     default: null
   },
   lastName: {
     type: String,
-    default: null
-  },
-  creditCardNumber: {
-    type: Number,
     default: null
   },
   rate: {
@@ -38,42 +31,40 @@ const userSchema = new Schema({
     type: String,
     default: null
   },
-  phoneNumber : {
-    type:String,
-     default: null
-  },
-  image : {
-    type:String,
-     default: null
-  },
   experience: {
     type: Number,
     default: null
   },
   roles: {
     type: String,
-    enum: ['technicien', 'admin', 'client'],
+    enum: ['technician', 'admin', 'client'],
     default: 'client'
   },
-  isVerified : 
-  {
-    type : Boolean,
-    default : false 
+  isVerified: {
+    type: Boolean,
+    default: false
   },
-  isBanned : 
-  {
-    type : Boolean,
-    default : false 
-  },
-  token : 
-  {
-    type : String,
+  token: {
+    type: String,
     default: null
-
+  },
+  phoneNumber: {
+    type: String,
+    
+    default: null
+  },
+  image: {
+    type: String,
+    default: null
+  },
+  creditCardNumber: {
+    type: Number,
+    default: null
   },
   resetToken: String,
   resetTokenExpiration: Date,
   otpCode: String,
-  otpExpiration: Date
- });
- export default model('User', userSchema);
+  otpExpiration: Date,
+});
+
+export default model('User', userSchema);
