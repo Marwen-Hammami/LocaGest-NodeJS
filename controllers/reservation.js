@@ -3,6 +3,11 @@ import Reservation from '../models/reservation.js';
 // import sendEmailWithAttachment from "../utils/Mailer.js";
 
 
+
+import pdf from 'pdfkit';
+import fs from 'fs';
+import nodemailer from 'nodemailer';
+
 const generateAndSendQRCode = async (req, res) => {
     try {
       const email = req.body.email;
@@ -52,6 +57,67 @@ export async function sendMail(req, res) {
       }
 
   }
+
+
+// Endpoint pour traiter le paiement et envoyer la facture par e-mail
+export async function processPaymentAndSendInvoice(req, res) {
+    const { reservationId, email } = req.body;
+
+    try {
+        // Trouver la réservation basée sur l'ID
+        const reservation = await Reservation.findById(reservationId);
+
+        if (!reservation) {
+            return res.status(404).json({ error: 'Réservation non trouvée' });
+        }
+
+        // Générer une facture au format PDF
+        const doc = new pdf();
+        doc.text(`Facture pour la réservation ID: ${reservationId}`);
+        const invoicePath = `./invoices/invoice_${reservationId}.pdf`;
+        doc.pipe(fs.createWriteStream(invoicePath));
+        doc.end();
+
+        // Configurer le service d'e-mail avec nodemailer
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'votre-email@gmail.com',
+                pass: 'votre-mot-de-passe-email'
+            }
+        });
+
+        const mailOptions = {
+            from: 'votre-email@gmail.com',
+            to: email,
+            subject: 'Facture de paiement',
+            text: 'Merci pour votre paiement!',
+            attachments: [{
+                filename: `invoice_${reservationId}.pdf`,
+                path: invoicePath
+            }]
+        };
+
+        // Envoyer l'e-mail avec la facture
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log(error);
+                res.status(500).json({ error: error.message });
+            } else {
+                console.log('Email sent: ' + info.response);
+                res.status(200).json({ message: 'Facture envoyée avec succès par e-mail' });
+            }
+
+            // Supprimer le fichier de la facture une fois envoyé
+            fs.unlinkSync(invoicePath);
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
 
 // Create a new reservation
 export async function createReservation(req, res) {
