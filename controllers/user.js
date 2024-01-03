@@ -544,7 +544,7 @@ export function signInUser(req, res) {
 
   // Validate input data
   if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required fields.' });
+      return res.status(400).json({ error: 'Email and password are required fields.' });
   }
 
   // Sanitize the email input
@@ -552,58 +552,100 @@ export function signInUser(req, res) {
 
   // Find the user by email
   User.findOne({ email: sanitizedEmail })
-    .then(user => {
-      if (!user) {
-        return res.status(400).json({ error: 'Invalid email or password.' });
-      }
-
-      // Check if the user is banned
-      if (user.isBanned === true) {
-        const response = {
-          error: 'Access denied. User is banned.'
-        };
-
-        if (user.msgBan) {
-          response.msgBan = user.msgBan;
-        }
-
-        return res.status(403).json(response);
-      }
-
-      if (user.isArchived === true) {
-        const response = {
-          error: 'Access denied. User is deleted.'
-        };
-        return res.status(403).json(response);
-      }
-
-      // Compare the provided password with the stored hashed password
-      bcrypt.compare(password, user.password)
-        .then((result) => {
-          if (result) {
-            // If they match, return only necessary data
-            const userData = {
-              success: true,
-              user: {
-                id: user.id,
-                email: user.email
-              },
-              token: jwt.sign({ id: user.id }, secretKey)
-            };
-
-            res.status(200).json(userData);
-          } else {
-            res.status(400).json({ error: 'Invalid email or password.' });
+      .then(user => {
+          if (!user) {
+              return res.status(400).json({ error: 'Invalid email or password.' });
           }
-        })
-        .catch((error) => {
+
+          // Compare the provided password with the stored hashed password
+          bcrypt.compare(password, user.password)
+              .then((result) => {
+                  if (result) {
+                      // If they match, return only necessary data
+                      const userData = {
+                          id: user.id,
+                          email: user.email
+                      };
+                      const token = jwt.sign(userData, secretKey);
+
+                      res.status(200).json({ userData, token });
+                  } else {
+                      res.status(400).json({ error: 'Invalid email or password.' });
+                  }
+              })
+              .catch((error) => {
+                  res.status(500).json({ error: error.message });
+              });
+      })
+      .catch(error => {
           res.status(500).json({ error: error.message });
-        });
-    })
-    .catch(error => {
-      res.status(500).json({ error: error.message });
-    });
-  }
+      });
+}
+  export function signInUserAndroid(req, res) {
+    const { email, password } = req.body;
+  
+    // Validate input data
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required fields.' });
+    }
+  
+    // Sanitize the email input
+    const sanitizedEmail = validator.escape(email);
+  
+    // Find the user by email
+    User.findOne({ email: sanitizedEmail })
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({ error: 'Invalid email or password.' });
+        }
+  
+        // Check if the user is banned
+        if (user.isBanned === true) {
+          const response = {
+            error: 'Access denied. User is banned.'
+          };
+  
+          if (user.msgBan) {
+            response.msgBan = user.msgBan;
+          }
+  
+          return res.status(403).json(response);
+        }
+  
+        if (user.isArchived === true) {
+          const response = {
+            error: 'Access denied. User is deleted.'
+          };
+          return res.status(403).json(response);
+        }
+  
+        // Compare the provided password with the stored hashed password
+        bcrypt.compare(password, user.password)
+          .then((result) => {
+            if (result) {
+              // If they match, return only necessary data
+              const userData = {
+                success: true,
+                user: {
+                  id: user.id,
+                  email: user.email
+                },
+                token: jwt.sign({ id: user.id }, secretKey)
+              };
+  
+              res.status(200).json(userData);
+            } else {
+              res.status(400).json({ error: 'Invalid email or password.' });
+            }
+          })
+          .catch((error) => {
+            res.status(500).json({ error: error.message });
+          });
+      })
+      .catch(error => {
+        res.status(500).json({ error: error.message });
+      });
+    }
 
   export function signInUserAdmin(req, res) {
     const { email, password } = req.body;
