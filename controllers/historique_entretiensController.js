@@ -1,115 +1,106 @@
-// Importer le modèle HistoriqueEntretien
 import HistoriqueEntretien from '../models/historique_entretiens.js';
+import { validationResult } from "express-validator"; 
 
-// Créer un contrôleur pour gérer les requêtes liées aux historiques d'entretien
-const historiquesEntretienController = {};
 
-// Créer une méthode pour ajouter un nouvel historique d'entretien à la base de données
-historiquesEntretienController.createHistoriqueEntretien = async (req, res) => {
+// Créer un nouvel entretien
+export async function addOnce(req, res) {
   try {
-    // Récupérer les données de la requête
-    const { ObjectId, Date_entretien, Description, Cout_reparation, Vehicule_Type } = req.body;
-
-    // Créer un nouvel objet HistoriqueEntretien
-    const newHistoriqueEntretien = new HistoriqueEntretien({
-      ObjectId,
-      Date_entretien,
-      Description,
-      Cout_reparation,
-      Vehicule_Type,
+    let newEntretien = await HistoriqueEntretien.create({
+      immatriculation: req.body.immatriculation,
+      date_entretien: req.body.date_entretien,
+      description: req.body.description,
+      cout_reparation: req.body.cout_reparation,
+      titre: req.body.titre,
+      cartype: req.body.cartype,
+      image: req.file.filename
     });
 
-    // Sauvegarder l'objet dans la base de données
-    await newHistoriqueEntretien.save();
-
-    // Envoyer une réponse avec le statut 201 (Created) et l'objet créé
-    res.status(201).json(newHistoriqueEntretien);
-  } catch (error) {
-    // En cas d'erreur, envoyer une réponse avec le statut 500 (Internal Server Error) et le message d'erreur
-    res.status(500).json({ message: error.message });
+    res.status(200).json({
+      immatriculation: newEntretien.immatriculation,
+      cartype: newEntretien.cartype,
+      date_entretien: newEntretien.date_entretien,
+      description: newEntretien.description,
+      cout_reparation: newEntretien.cout_reparation,
+      titre: newEntretien.titre,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Internal Server Error" });
   }
-};
+}
 
-// Créer une méthode pour récupérer tous les historiques d'entretien de la base de données
-historiquesEntretienController.getHistoriquesEntretien = async (req, res) => {
+// Obtenir la liste de tous les entretiens
+export function getAllEntretiens(req, res) {
+  HistoriqueEntretien.find({})
+    .then((docs) => {
+      res.status(200).json(docs);
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err });
+    });
+}
+
+// Mettre à jour un entretien
+export async function updateEntretien(req, res) {
   try {
-    // Trouver tous les historiques d'entretien dans la base de données
-    const historiquesEntretien = await HistoriqueEntretien.find();
+    const immatriculationToUpdate = req.params.immatriculation; // Extract immatriculation from request parameters
 
-    // Envoyer une réponse avec le statut 200 (OK) et le tableau des historiques d'entretien
-    res.status(200).json(historiquesEntretien);
-  } catch (error) {
-    // En cas d'erreur, envoyer une réponse avec le statut 500 (Internal Server Error) et le message d'erreur
-    res.status(500).json({ message: error.message });
-  }
-};
+    let newEntretienData = req.file
+      ? {
+          immatriculation: immatriculationToUpdate,
+          date_entretien: req.body.date_entretien,
+          cartype: req.body.cartype,
+          description: req.body.description,
+          cout_reparation: req.body.cout_reparation,
+          titre: req.body.titre,
+          image: req.file.filename
+        }
+      : {
+          immatriculation: immatriculationToUpdate,
+          date_entretien: req.body.date_entretien,
+          cartype: req.body.cartype,
+          description: req.body.description,
+          cout_reparation: req.body.cout_reparation,
+          titre: req.body.titre,
+        };
 
-// Créer une méthode pour récupérer un historique d'entretien par son identifiant
-historiquesEntretienController.getHistoriqueEntretienById = async (req, res) => {
-  try {
-    // Récupérer l'identifiant de la requête
-    const { id } = req.params;
+    let updatedEntretien = await HistoriqueEntretien.findOneAndUpdate(
+      { immatriculation: immatriculationToUpdate }, // Update based on immatriculation
+      newEntretienData,
+      { new: true }
+    );
 
-    // Trouver l'historique d'entretien correspondant dans la base de données
-    const historiqueEntretien = await HistoriqueEntretien.findById(id);
-
-    // Si l'historique d'entretien n'existe pas, envoyer une réponse avec le statut 404 (Not Found) et un message d'erreur
-    if (!historiqueEntretien) {
-      return res.status(404).json({ message: 'Historique d\'entretien introuvable' });
+    if (updatedEntretien) {
+      console.log("Entretien updated successfully:", updatedEntretien);
+      res.status(200).json(updatedEntretien);
+    } else {
+      console.log("Entretien not found.");
+      res.status(404).json({ error: "Entretien not found" });
     }
-
-    // Sinon, envoyer une réponse avec le statut 200 (OK) et l'historique d'entretien trouvé
-    res.status(200).json(historiqueEntretien);
-  } catch (error) {
-    // En cas d'erreur, envoyer une réponse avec le statut 500 (Internal Server Error) et le message d'erreur
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    console.error("Error during Entretien update:", err);
+    res.status(500).json({ error: err.message || "Internal Server Error" });
   }
-};
+}
 
-// Créer une méthode pour modifier un historique d'entretien par son identifiant
-historiquesEntretienController.updateHistoriqueEntretienById = async (req, res) => {
-  try {
-    // Récupérer l'identifiant et les données de la requête
-    const { id } = req.params;
-    const { Date_entretien, Description, Cout_reparation, Vehicule_Type } = req.body;
 
-    // Créer un objet avec les données à modifier
-    const updateData = {
-      Date_entretien,
-      Description,
-      Cout_reparation,
-      Vehicule_Type,
-    };
 
-    // Modifier l'historique d'entretien correspondant dans la base de données
-    const updatedHistoriqueEntretien = await HistoriqueEntretien.findByIdAndUpdate(id, updateData, {
-      new: true,
+
+// Supprimer un entretien
+export function deleteEntretien(req, res) {
+  const { immatriculation } = req.params;
+
+  HistoriqueEntretien.findOneAndDelete({ "immatriculation": immatriculation })
+    .then(doc => {
+      if (doc) {
+        console.log("Entretien supprimé avec succès :", doc);
+        res.status(200).json(doc);
+      } else {
+        console.log("Entretien non trouvé.");
+        res.status(404).json({ message: "Entretien non trouvé" });
+      }
+    })
+    .catch(err => {
+      console.error("Erreur lors de la suppression de l'entretien :", err);
+      res.status(500).json({ error: err });
     });
-
-    // Envoyer une réponse avec le statut 200 (OK) et l'historique d'entretien modifié
-    res.status(200).json(updatedHistoriqueEntretien);
-  } catch (error) {
-    // En cas d'erreur, envoyer une réponse avec le statut 500 (Internal Server Error) et le message d'erreur
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Créer une méthode pour supprimer un historique d'entretien par son identifiant
-historiquesEntretienController.deleteHistoriqueEntretienById = async (req, res) => {
-  try {
-    // Récupérer l'identifiant de la requête
-    const { id } = req.params;
-
-    // Supprimer l'historique d'entretien correspondant dans la base de données
-    await HistoriqueEntretien.findByIdAndDelete(id);
-
-    // Envoyer une réponse avec le statut 200 (OK) et un message de confirmation
-    res.status(200).json({ message: 'Historique d\'entretien supprimé avec succès' });
-  } catch (error) {
-    // En cas d'erreur, envoyer une réponse avec le statut 500 (Internal Server Error) et le message d'erreur
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Exporter le contrôleur
-export default historiquesEntretienController;
+}

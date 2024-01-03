@@ -1,18 +1,41 @@
 // Importer le module express
 import express from 'express';
+import { body } from "express-validator";
+
+// Importer le controller historiquesEntretien
+import {
+  addOnce,
+  getAllEntretiens,
+  updateEntretien,
+  deleteEntretien
+} from "../controllers/historique_entretiensController.js";
+
+import multerConfig from '../middlewares/multer-config-maamoun.js';
 
 // Créer un objet router
 const router = express.Router();
 
-// Importer le controller historiquesEntretien
-import historiquesEntretienController from '../controllers/historique_entretiensController.js';
-
 // Définir les routes pour les différentes méthodes de requête
-router.post('/', historiquesEntretienController.createHistoriqueEntretien); // Créer un nouvel historique d'entretien
-router.get('/', historiquesEntretienController.getHistoriquesEntretien); // Récupérer tous les historiques d'entretien
-router.get('/:id', historiquesEntretienController.getHistoriqueEntretienById); // Récupérer un historique d'entretien par son identifiant
-router.put('/:id', historiquesEntretienController.updateHistoriqueEntretienById); // Modifier un historique d'entretien par son identifiant
-router.delete('/:id', historiquesEntretienController.deleteHistoriqueEntretienById); // Supprimer un historique d'entretien par son identifiant
+router
+  .route("/")
+  .get(getAllEntretiens)
+  .post(
+    multerConfig, // Utilisez multerConfig en tant que middleware pour gérer les fichiers
+    [
+      body("immatriculation").isString(),
+      body("cartype").isString(),
+      body("titre").isString(),
+      body("date_entretien").isISO8601(),
+      body("description").isString(),
+      body("cout_reparation").isNumeric(),
+    ],
+    addOnce
+  );
+
+router
+  .route("/:immatriculation")
+  .put(multerConfig, updateEntretien)
+  .delete(deleteEntretien);
 
 // Exporter le router
 export default router;

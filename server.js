@@ -12,6 +12,7 @@ import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 //import routes
 import Agence from './routes/Agence.js';
 import car from "./routes/car.js";
+import historiqueEntretienRoutes from './routes/historique_entretien.js'
 import user from './routes/user.js';
 import Message from './routes/Message.js';
 import Conversation from "./routes/Conversation.js";
@@ -64,6 +65,7 @@ app.use('/agence', Agence)
 app.use('/res',Reservation);
 app.use('/histo',Historique);
 app.use('/car', car)
+app.use('/historique_entretien', historiqueEntretienRoutes);
 app.use('/User', user);
 app.use('/messages', Message);
 app.use('/conversations', Conversation);
